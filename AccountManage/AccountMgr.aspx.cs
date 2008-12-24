@@ -7,9 +7,9 @@ using System.DirectoryServices;
 using System.Web;
 using System.Web.UI.WebControls;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
-    public partial class AccountManage : System.Web.UI.Page
+    public partial class AccountMgr : System.Web.UI.Page
     {
         private DataTable DataSource, groupTab;
         private bool IsEmptyFlag = false;

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NTLM.Account {
+namespace SvnAccount.AccountManage {
     
     
     public partial class HomePage {

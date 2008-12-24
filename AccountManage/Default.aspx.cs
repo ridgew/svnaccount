@@ -2,7 +2,7 @@
 using System.Security.Principal;
 using System.Collections.Specialized;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
     public partial class HomePage : System.Web.UI.Page
     {

@@ -2,7 +2,7 @@ using System;
 using System.Web;
 using System.Web.SessionState;
 
-namespace NTLM.Account 
+namespace SvnAccount.AccountManage 
 {
 	public class Global : System.Web.HttpApplication
 	{

@@ -10,7 +10,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
     /// <summary>
     /// Windows身份模拟

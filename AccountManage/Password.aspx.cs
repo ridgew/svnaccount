@@ -3,7 +3,7 @@ using System.Configuration;
 using System.DirectoryServices;
 using System.Web;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
     public partial class Password : System.Web.UI.Page
     {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
     /// <summary>
     /// 对称加密算法类，使用系统自带的函数

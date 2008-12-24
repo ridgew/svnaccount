@@ -40,7 +40,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AccountManage.aspx" />
+    <Content Include="AccountMgr.aspx" />
     <Content Include="ApacheChange.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
@@ -51,12 +51,12 @@
     <Content Include="WinLogin.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccountManage.aspx.cs">
-      <DependentUpon>AccountManage.aspx</DependentUpon>
+    <Compile Include="AccountMgr.aspx.cs">
+      <DependentUpon>AccountMgr.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="AccountManage.aspx.designer.cs">
-      <DependentUpon>AccountManage.aspx</DependentUpon>
+    <Compile Include="AccountMgr.aspx.designer.cs">
+      <DependentUpon>AccountMgr.aspx</DependentUpon>
     </Compile>
     <Compile Include="ApacheChange.aspx.cs">
       <DependentUpon>ApacheChange.aspx</DependentUpon>
@@ -80,6 +80,13 @@
       <DependentUpon>Password.aspx</DependentUpon>
     </Compile>
     <Compile Include="Util\AccountHelper.cs" />
+    <Compile Include="Util\CookieProtectionHelperWrapper.cs" />
+    <Compile Include="Util\HttpSecureCookie.cs" />
+    <Compile Include="Util\InvalidCypherTextException.cs" />
+    <Compile Include="Util\LogonPageBase.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Util\MachineKeyCryptography.cs" />
     <Compile Include="Util\SymmetricMethod.cs" />
     <Compile Include="Util\DirectoryServicesManager.cs" />
     <Compile Include="Global.asax.cs">

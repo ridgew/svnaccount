@@ -1,4 +1,4 @@
-<%@ Page language="C#" Codebehind="WebLogin.aspx.cs" AutoEventWireup="false" Inherits="NTLM.Account.WebLogin" %>
+<%@ Page language="C#" Codebehind="WebLogin.aspx.cs" AutoEventWireup="false" Inherits="SvnAccount.AccountManage.WebLogin" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" >
 <html>
 <head>

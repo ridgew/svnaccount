@@ -1,1 +1,1 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ApacheChange.aspx.cs" Inherits="NTLM.Account.ApacheChange" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ApacheChange.aspx.cs" Inherits="SvnAccount.AccountManage.ApacheChange" %>

@@ -1,1 +1,1 @@
-<%@ Application Codebehind="Global.asax.cs" Inherits="NTLM.Account.Global" %>
+<%@ Application Codebehind="Global.asax.cs" Inherits="SvnAccount.AccountManage.Global" %>

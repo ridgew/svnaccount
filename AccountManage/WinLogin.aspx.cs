@@ -5,7 +5,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.UI.HtmlControls;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
 	public class WinLogin : System.Web.UI.Page
 	{

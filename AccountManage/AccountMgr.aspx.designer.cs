@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NTLM.Account {
+namespace SvnAccount.AccountManage {
     
     
-    public partial class AccountManage {
+    public partial class AccountMgr {
         
         /// <summary>
         /// form1 控件。

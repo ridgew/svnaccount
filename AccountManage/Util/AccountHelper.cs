@@ -3,8 +3,14 @@ using System.Collections.Specialized;
 using System.DirectoryServices;
 using System;
 using System.Configuration;
+using System.Diagnostics;
+using System.ServiceProcess;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
+using System.IO;
 
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
     public static class AccountHelper
     {
@@ -109,5 +115,226 @@ namespace NTLM.Account
             }
             return blnResult;
         }
+
+
+        /// <summary>
+        /// 测试原始用户名和密码是否正确
+        /// </summary>
+        public static bool TestAuth(string username, string password)
+        {
+            #region Windows集成帐户认证
+            if (!IsApacheAuthMode())
+            {
+                bool blnResult = false;
+                using (IdentityAnalogue ID = new IdentityAnalogue())
+                {
+                    if (ID.TryLogonAs(".", username, password))
+                    {
+                        blnResult = true;
+                    }
+                }
+                return blnResult;
+            }
+            #endregion
+
+            string url = ConfigurationManager.AppSettings["AuthURL4Pass"];
+            WebClient wc = new WebClient();
+            WebHeaderCollection headers = new WebHeaderCollection();
+            headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows; U; Windows NT 5.2; zh-CN; rv:1.8.1.19) Gecko/20081201 Firefox/2.0.0.19 (.NET CLR 3.5.30729)");
+            wc.Headers = headers;
+
+            wc.Credentials = new NetworkCredential(username, password);
+
+            //System.Net.ServicePointManager.CertificatePolicy = new TrustAllCertificatePolicy(); 
+            ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(
+                delegate(object o, X509Certificate cert, X509Chain chain, SslPolicyErrors errors)
+                {
+                    return true;
+                });
+
+            try
+            {
+
+                MemoryStream ms = new MemoryStream();
+                using (Stream rms = wc.OpenRead(url))
+                {
+                    int bt = rms.ReadByte();
+                    while (bt != -1)
+                    {
+                        ms.WriteByte(Convert.ToByte(bt));
+                        bt = rms.ReadByte();
+                    }
+                    rms.Close();
+                }
+
+                //Console.WriteLine("读取响应流完成，输出响应头...");
+                //for (int i = 0; i < wc.ResponseHeaders.Count; i++)
+                //{
+                //    Console.WriteLine("{0}:{1}", wc.ResponseHeaders.AllKeys[i], wc.ResponseHeaders[i]);
+                //}
+                //Console.WriteLine(Encoding.UTF8.GetString(ms.ToArray()));
+
+                ms.Close();
+                ms.Dispose();
+
+                return true;
+            }
+            catch (WebException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 判断是否存在Apache MD5认证的用户名
+        /// </summary>
+        public static bool IsExistsApacheUser(string username)
+        {
+            string htpasswdFile = ConfigurationManager.AppSettings["htpasswdFile"];
+            bool found = false;
+            using (StreamReader sr = new StreamReader(htpasswdFile))
+            {
+                string lineStr;
+                while ((lineStr = sr.ReadLine()) != null)
+                {
+                    lineStr = lineStr.Trim();
+                    if (lineStr.ToLower().StartsWith(username.ToLower() + ":"))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                sr.Close();
+            }
+            return found;
+        }
+
+        /// <summary>
+        /// 检查是否配置为Apache MD5认证
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsApacheAuthMode()
+        {
+            #region 检查配置
+            /*
+               -- Windows集成认证
+               AuthType Basic
+               AuthBasicProvider visualsvn
+               AuthzVisualSVNAccessFile "D:/Repositories/authz-windows"
+               AuthnVisualSVNUPN Off
+
+               -- Apache MD5认证
+               AuthType Basic
+               AuthBasicProvider file
+               AuthUserFile "D:/Repositories/htpasswd"
+               AuthzSVNAccessFile "D:/Repositories/authz"
+             
+             */
+            StreamReader sr = new StreamReader(ConfigurationManager.AppSettings["SvnServerConf"]);
+            string lineStr, providerStr = string.Empty;
+            bool found = false;
+            while ((lineStr = sr.ReadLine()) != null)
+            {
+                if (found) break;
+
+                lineStr = lineStr.Trim();
+                if (lineStr.StartsWith("AuthBasicProvider"))
+                {
+                    providerStr = lineStr.Substring("AuthBasicProvider".Length + 1);
+                    found = true;
+                }
+
+            }
+            #endregion
+
+            return (providerStr == "file");
+
+        }
+
+        public static void RestartApache()
+        {
+            ServiceController controller = new ServiceController(ConfigurationManager.AppSettings["ApacheService"]);
+            if (controller.Status == ServiceControllerStatus.Running)
+            {
+                Console.WriteLine("正在运行，准备关闭...");
+                controller.Stop();
+                controller.WaitForStatus(ServiceControllerStatus.Stopped);
+            }
+
+            Console.WriteLine("正在重新开始运行...");
+            controller.Start();
+            controller.WaitForStatus(ServiceControllerStatus.Running);
+            Console.WriteLine("重启完成！");
+        }
+
+        /// <summary>
+        /// 正确修改/创建密码则返回字符结果为0,创建用户时请指定旧密码为NULL。
+        /// </summary>
+        public static string ApacheChangeOrCreateAccount(string username, string oldpassWord, string newPasword)
+        {
+            if (oldpassWord != null && !TestAuth(username, oldpassWord))
+            {
+                return "提供的帐户信息不正确！";
+            }
+            else
+            {
+                //禁止通过创建修改原有用户的密码
+                if (oldpassWord == null && IsExistsApacheUser(username))
+                {
+                    return "创建用户失败，用户名[" + username + "]已存在！";
+                }
+
+                #region 密码更改/创建命令
+
+                //C:\Program Files\VisualSVN Server\bin>htpasswd
+                //Usage:
+                //        htpasswd [-cmdpsD] passwordfile username
+                //        htpasswd -b[cmdpsD] passwordfile username password
+
+                //        htpasswd -n[mdps] username
+                //        htpasswd -nb[mdps] username password
+                // -c  Create a new file.
+                // -n  Don't update file; display results on stdout.
+                // -m  Force MD5 encryption of the password (default).
+                // -d  Force CRYPT encryption of the password.
+                // -p  Do not encrypt the password (plaintext).
+                // -s  Force SHA encryption of the password.
+                // -b  Use the password from the command line rather than prompting for it.
+                // -D  Delete the specified user.
+                //On Windows, NetWare and TPF systems the '-m' flag is used by default.
+                //On all other systems, the '-p' flag will probably not work.
+
+                #endregion
+
+                string htpasswdPath = ConfigurationManager.AppSettings["htpasswdPath"];
+                string htpasswdFile = ConfigurationManager.AppSettings["htpasswdFile"];
+                string args = string.Format("-b {0} {1} {2}", htpasswdFile, username, newPasword);
+
+                Process proc = new Process();
+                ProcessStartInfo psInfo = new ProcessStartInfo(htpasswdPath, args);
+                psInfo.UseShellExecute = false;
+                psInfo.RedirectStandardError = true;
+                psInfo.RedirectStandardOutput = true;
+                psInfo.RedirectStandardInput = true;
+                psInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                psInfo.WorkingDirectory = Path.GetDirectoryName(htpasswdPath);
+
+                proc.StartInfo = psInfo;
+                proc.Start();
+                string result = "";
+                while (!proc.HasExited)
+                {
+                    result = proc.StandardOutput.ReadToEnd().Replace("\r", "");
+                    System.Threading.Thread.Sleep(500);
+                }
+                proc.Close();
+                proc.Dispose();
+
+                Console.WriteLine(result);
+
+                return "0";
+            }
+        }
+
     }
 }

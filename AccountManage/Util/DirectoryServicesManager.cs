@@ -19,7 +19,7 @@ using System.Web.UI.WebControls;
 // For a list of all IIS ADSI objects, methods, properties, etc. see following URL
 //
 // http://msdn.microsoft.com/library/en-us/iissdk/iis/ref_prog_iaoref.asp?frame=true
-namespace NTLM.Account
+namespace SvnAccount.AccountManage
 {
 	/// <summary>
 	/// all the attribute types supported by Ldap
