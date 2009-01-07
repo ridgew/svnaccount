@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountManage", "AccountMan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PwdGenDen", "PwdGenDen\PwdGenDen.csproj", "{17CAAD54-4BD8-4304-9D03-FD30AACA7B0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebConfigWizard", "WebConfigWizard\WebConfigWizard.csproj", "{FAA0DA3A-481D-4934-B53B-136818C6FA24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{17CAAD54-4BD8-4304-9D03-FD30AACA7B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17CAAD54-4BD8-4304-9D03-FD30AACA7B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17CAAD54-4BD8-4304-9D03-FD30AACA7B0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA0DA3A-481D-4934-B53B-136818C6FA24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA0DA3A-481D-4934-B53B-136818C6FA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA0DA3A-481D-4934-B53B-136818C6FA24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA0DA3A-481D-4934-B53B-136818C6FA24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

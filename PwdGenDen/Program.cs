@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NTLM.Account;
+using SvnAccount.AccountManage;
 
 namespace SvnAccount.PwdGenDen
 {

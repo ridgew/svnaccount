@@ -9,6 +9,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.Security;
 using System.IO;
+using System.Xml;
 
 namespace SvnAccount.AccountManage
 {
@@ -333,6 +334,44 @@ namespace SvnAccount.AccountManage
                 Console.WriteLine(result);
 
                 return "0";
+            }
+        }
+
+
+        /// <summary>
+        /// 基于web.config模型的AppSettings设置
+        /// </summary>
+        /// <param name="configPath">配置文件路径，相对或完整路径。</param>
+        /// <param name="key">健</param>
+        /// <param name="Value">健的值</param>
+        /// <returns>成功则为0，失败则返回异常信息。</returns>
+        public static string SetAppSettings(string configPath, string key, string Value)
+        {
+            string configFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configPath);
+            try
+            {
+                System.Configuration.ConfigXmlDocument xmlConfig = new System.Configuration.ConfigXmlDocument();
+                xmlConfig.Load(configFile);
+
+                System.Xml.XmlNode node = xmlConfig.SelectSingleNode("configuration/appSettings/add[@key='" + key + "']");
+                if (node != null)
+                {
+                    node.Attributes["value"].Value = Value;
+                }
+                else
+                {
+                    XmlElement element = xmlConfig.CreateElement("add");
+                    element.SetAttribute("key", key);
+                    element.SetAttribute("value", Value);
+                    node = xmlConfig.SelectSingleNode("configuration/appSettings");
+                    node.AppendChild(element);
+                }
+                xmlConfig.Save(configFile);
+                return "0";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
 

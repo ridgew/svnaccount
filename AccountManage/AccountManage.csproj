@@ -11,6 +11,8 @@
     <RootNamespace>SvnAccount.AccountManage</RootNamespace>
     <AssemblyName>SvnAccount</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\SvnAccount.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -102,6 +104,9 @@
       <DependentUpon>WinLogin.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\SvnAccount.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets" />
