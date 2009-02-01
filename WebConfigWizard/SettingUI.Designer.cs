@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.tbxSvnWebRoot = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -41,37 +41,38 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.btnSaveDo = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.button2 = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.textBox5 = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.textBox7 = new System.Windows.Forms.TextBox();
-            this.textBox8 = new System.Windows.Forms.TextBox();
-            this.textBox9 = new System.Windows.Forms.TextBox();
-            this.textBox10 = new System.Windows.Forms.TextBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.btnResetSevices = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.tbxVSVNSName = new System.Windows.Forms.TextBox();
+            this.textBox9 = new System.Windows.Forms.TextBox();
+            this.textBox8 = new System.Windows.Forms.TextBox();
+            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.lblMsg = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // textBox1
+            // tbxSvnWebRoot
             // 
-            this.textBox1.Location = new System.Drawing.Point(143, 26);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(238, 21);
-            this.textBox1.TabIndex = 0;
+            this.tbxSvnWebRoot.Location = new System.Drawing.Point(143, 26);
+            this.tbxSvnWebRoot.Name = "tbxSvnWebRoot";
+            this.tbxSvnWebRoot.Size = new System.Drawing.Size(238, 21);
+            this.tbxSvnWebRoot.TabIndex = 0;
             // 
             // label1
             // 
@@ -189,6 +190,15 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "服务器管理员帐号信息";
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(364, 14);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(53, 23);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "验证";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
             // label5
             // 
             this.label5.AutoSize = true;
@@ -222,15 +232,6 @@
             this.textBox5.TabIndex = 2;
             this.textBox5.UseSystemPasswordChar = true;
             // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(364, 14);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(53, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "验证";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -253,12 +254,12 @@
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Controls.Add(this.button6);
+            this.groupBox3.Controls.Add(this.btnResetSevices);
             this.groupBox3.Controls.Add(this.button5);
             this.groupBox3.Controls.Add(this.button4);
             this.groupBox3.Controls.Add(this.button3);
             this.groupBox3.Controls.Add(this.label7);
-            this.groupBox3.Controls.Add(this.textBox10);
+            this.groupBox3.Controls.Add(this.tbxVSVNSName);
             this.groupBox3.Controls.Add(this.textBox9);
             this.groupBox3.Controls.Add(this.textBox8);
             this.groupBox3.Controls.Add(this.textBox7);
@@ -270,23 +271,14 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "其他配置";
             // 
-            // label8
+            // label11
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(52, 56);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(89, 12);
-            this.label8.TabIndex = 0;
-            this.label8.Text = "Apache配置文件";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(64, 86);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(77, 12);
-            this.label9.TabIndex = 0;
-            this.label9.Text = "密码修改工具";
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(46, 144);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(95, 12);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "SVN系统服务名称";
             // 
             // label10
             // 
@@ -297,60 +289,33 @@
             this.label10.TabIndex = 0;
             this.label10.Text = "自定义认证密码文件";
             // 
-            // label11
+            // label9
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(46, 144);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(95, 12);
-            this.label11.TabIndex = 0;
-            this.label11.Text = "SVN系统服务名称";
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(64, 86);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(77, 12);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "密码修改工具";
             // 
-            // textBox7
+            // label8
             // 
-            this.textBox7.Location = new System.Drawing.Point(152, 53);
-            this.textBox7.Name = "textBox7";
-            this.textBox7.Size = new System.Drawing.Size(232, 21);
-            this.textBox7.TabIndex = 0;
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(52, 56);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(89, 12);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "Apache配置文件";
             // 
-            // textBox8
+            // btnResetSevices
             // 
-            this.textBox8.Location = new System.Drawing.Point(152, 81);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(232, 21);
-            this.textBox8.TabIndex = 0;
-            // 
-            // textBox9
-            // 
-            this.textBox9.Location = new System.Drawing.Point(152, 111);
-            this.textBox9.Name = "textBox9";
-            this.textBox9.Size = new System.Drawing.Size(232, 21);
-            this.textBox9.TabIndex = 0;
-            // 
-            // textBox10
-            // 
-            this.textBox10.Location = new System.Drawing.Point(152, 140);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.Size = new System.Drawing.Size(120, 21);
-            this.textBox10.TabIndex = 0;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(390, 53);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(49, 23);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "选择..";
-            this.button3.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(390, 81);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(49, 23);
-            this.button4.TabIndex = 2;
-            this.button4.Text = "选择..";
-            this.button4.UseVisualStyleBackColor = true;
+            this.btnResetSevices.Location = new System.Drawing.Point(278, 140);
+            this.btnResetSevices.Name = "btnResetSevices";
+            this.btnResetSevices.Size = new System.Drawing.Size(96, 23);
+            this.btnResetSevices.TabIndex = 2;
+            this.btnResetSevices.Text = "重新启动服务";
+            this.btnResetSevices.UseVisualStyleBackColor = true;
+            this.btnResetSevices.Click += new System.EventHandler(this.btnResetSevices_Click);
             // 
             // button5
             // 
@@ -361,27 +326,79 @@
             this.button5.Text = "选择..";
             this.button5.UseVisualStyleBackColor = true;
             // 
-            // button6
+            // button4
             // 
-            this.button6.Location = new System.Drawing.Point(278, 140);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(96, 23);
-            this.button6.TabIndex = 2;
-            this.button6.Text = "重新启动服务";
-            this.button6.UseVisualStyleBackColor = true;
+            this.button4.Location = new System.Drawing.Point(390, 81);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(49, 23);
+            this.button4.TabIndex = 2;
+            this.button4.Text = "选择..";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(390, 53);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(49, 23);
+            this.button3.TabIndex = 2;
+            this.button3.Text = "选择..";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // tbxVSVNSName
+            // 
+            this.tbxVSVNSName.Location = new System.Drawing.Point(152, 140);
+            this.tbxVSVNSName.Name = "tbxVSVNSName";
+            this.tbxVSVNSName.Size = new System.Drawing.Size(120, 21);
+            this.tbxVSVNSName.TabIndex = 0;
+            this.tbxVSVNSName.Text = "VisualSVNServer";
+            // 
+            // textBox9
+            // 
+            this.textBox9.Location = new System.Drawing.Point(152, 111);
+            this.textBox9.Name = "textBox9";
+            this.textBox9.Size = new System.Drawing.Size(232, 21);
+            this.textBox9.TabIndex = 0;
+            // 
+            // textBox8
+            // 
+            this.textBox8.Location = new System.Drawing.Point(152, 81);
+            this.textBox8.Name = "textBox8";
+            this.textBox8.Size = new System.Drawing.Size(232, 21);
+            this.textBox8.TabIndex = 0;
+            // 
+            // textBox7
+            // 
+            this.textBox7.Location = new System.Drawing.Point(152, 53);
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(232, 21);
+            this.textBox7.TabIndex = 0;
+            // 
+            // lblMsg
+            // 
+            this.lblMsg.AutoSize = true;
+            this.lblMsg.BackColor = System.Drawing.SystemColors.Info;
+            this.lblMsg.Location = new System.Drawing.Point(206, 233);
+            this.lblMsg.Name = "lblMsg";
+            this.lblMsg.Size = new System.Drawing.Size(53, 12);
+            this.lblMsg.TabIndex = 7;
+            this.lblMsg.Text = "消息提醒";
+            this.lblMsg.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblMsg.Visible = false;
+            this.lblMsg.Click += new System.EventHandler(this.lblMsg_Click);
             // 
             // SettingUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(530, 479);
+            this.Controls.Add(this.lblMsg);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.btnSaveDo);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.tbxSvnWebRoot);
             this.MaximizeBox = false;
             this.Name = "SettingUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -399,7 +416,7 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tbxSvnWebRoot;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -424,13 +441,14 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBox10;
+        private System.Windows.Forms.TextBox tbxVSVNSName;
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.TextBox textBox7;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button btnResetSevices;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label lblMsg;
     }
 }
