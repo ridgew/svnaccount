@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E9E43A84-5B63-46E9-9722-1A41FC01C40E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FIPFAPI</RootNamespace>
+    <AssemblyName>FIPFAPI</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>FIPFAPI.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>.\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'UnitTest|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\UnitTest\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiResult.cs" />
+    <Compile Include="Limited\Utility\VistaDBProjectPackage.cs" />
+    <Compile Include="FileAttrTest.cs" />
+    <Compile Include="IFilePackage.cs" />
+    <Compile Include="ProjectArchive.cs" />
+    <Compile Include="SerializeHelper.cs" />
+    <Compile Include="SqlDb\ConditionRelation.cs" />
+    <Compile Include="SqlDb\IDatabaseAPI.cs" />
+    <Compile Include="Cases\InformationAPI.cs" />
+    <Compile Include="Cases\InitialProject.cs" />
+    <Compile Include="Cases\ProjectSynAPI.cs" />
+    <Compile Include="Limited\Config\APIOwner.cs" />
+    <Compile Include="Limited\Config\APIProvider.cs" />
+    <Compile Include="Limited\Config\Hidden.cs" />
+    <Compile Include="Limited\Config\New.cs" />
+    <Compile Include="Limited\Config\Remove.cs" />
+    <Compile Include="Limited\Config\Update.cs" />
+    <Compile Include="Limited\ICreateAPI.cs" />
+    <Compile Include="Limited\ICRUDAPI.cs" />
+    <Compile Include="Limited\IDeleteAPI.cs" />
+    <Compile Include="Limited\IExecuteAPI.cs" />
+    <Compile Include="Limited\IModifyAPI.cs" />
+    <Compile Include="Limited\IProxyAPI.cs" />
+    <Compile Include="Limited\IReadAPI.cs" />
+    <Compile Include="Limited\IWriteAPI.cs" />
+    <Compile Include="SqlDb\RowCondition.cs" />
+    <Compile Include="SqlDb\RowIdentity.cs" />
+    <Compile Include="SqlDb\Database.cs" />
+    <Compile Include="Limited\Utility\VistaDbDatabase.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Note.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Data\" />
+    <Folder Include="Common\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
