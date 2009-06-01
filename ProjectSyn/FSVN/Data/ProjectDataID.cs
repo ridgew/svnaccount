@@ -20,6 +20,40 @@ namespace FSVN.Data
         /// </summary>
         public string RepositoryId { get; set; }
 
+        /// <summary>
+        /// 获取名称（目录或文件名）
+        /// </summary>
+        public string GetName()
+        {
+            string idName = IdentityName.Replace("/", "\\");
+            int idx = idName.LastIndexOf("\\");
+            if (idx == -1)
+            {
+                return idName;
+            }
+            else
+            {
+                return idName.Substring(idx);
+            }
+        }
+
+        /// <summary>
+        /// 获取父级名称
+        /// </summary>
+        public string GetParentName()
+        {
+            string idName = IdentityName.Replace("/", "\\");
+            int idx = idName.LastIndexOf("\\");
+            if (idx == -1)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return idName.Substring(0, idx);
+            }
+        }
+
     }
 
 }

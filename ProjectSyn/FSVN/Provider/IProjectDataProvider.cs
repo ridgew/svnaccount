@@ -71,5 +71,7 @@ namespace FSVN.Provider
         ProjectData GetProjectData(string RepositoryId, string IdentityName, string rev);
         #endregion
 
+        /*移动、重命名 项目数据*/
+
     }
 }

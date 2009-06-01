@@ -6,7 +6,6 @@ using FSVN.Data;
 using FSVN.Config;
 using FSVN.Provider;
 using FSVN.Util;
-using System.Text;
 using NUnit.Framework;
 
 namespace FSVN.UnitTest
@@ -61,6 +60,8 @@ namespace FSVN.UnitTest
         public void GetReposNextReversion()
         {
             Console.WriteLine("版本库下一个版本:{0}", Repos.GetNextReversionID());
+
+            //System.IO.Directory.Move(@"D:\FSVNRepositories\90c25f5f-239d-45bc-b764-ff020ee3d6f9", @"D:\FSVNRepositories\aaa");
         }
 
         [Test]
@@ -120,6 +121,26 @@ namespace FSVN.UnitTest
             }
 
 
+        }
+
+        [Test]
+        public void TempDelete()
+        {
+            Repos.Commit(new ProjectDataID[] { 
+                new ProjectDataID { IdentityName = "js", RepositoryId = Repos.RepositoryId }
+            }, string.Empty);
+        }
+
+        [Test]
+        public void TempRemove()
+        { 
+        
+        }
+
+        [Test]
+        public void TempRename()
+        { 
+        
         }
 
         [Test]
