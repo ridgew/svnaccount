@@ -333,6 +333,17 @@ namespace FSVN.Data
 
         #endregion
 
+        /// <summary>
+        /// 获取变更到指定版本的变更日志
+        /// </summary>
+        /// <param name="startRev">起始版本</param>
+        /// <param name="rev">获取库中的特定版本：最新版本为$HEAD$。</param>
+        /// <returns>变更日志数据集合</returns>
+        public ChangeLog[] GetReversionLogs(long startRev, string rev)
+        {
+            return Provider.GetReversionLogs(RepositoryId, startRev, rev);
+        }
+
         private T GetProviderInstance<T>(string providerName)
             where T : new()
         {

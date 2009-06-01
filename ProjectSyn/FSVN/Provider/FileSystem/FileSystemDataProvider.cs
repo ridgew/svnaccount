@@ -255,7 +255,9 @@ namespace FSVN.Provider
                     Console.WriteLine("{0} 在版本库中不存在！", datArray[i].IdentityName);
                     continue;
                 }
-                
+
+                ListDel.Add(datArray[i].IdentityName);
+
                 fsvnFile = datDir + datArray[i].IdentityName.Replace('/', '\\') + ".fsvn";
                 //文件删除
                 if (File.Exists(fsvnFile))
@@ -265,7 +267,6 @@ namespace FSVN.Provider
 
                     //备份
                     File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
-                    ListDel.Add(datArray[i].IdentityName);
 
                     //移动文件 [fsvnFile].r*
 
@@ -353,6 +354,47 @@ namespace FSVN.Provider
             return svnBytes.GetObject<ProjectData>();
         }
 
+        /// <summary>
+        /// 获取变更到指定版本的变更日志
+        /// </summary>
+        /// <param name="RepositoryId">版本库标志编号</param>
+        /// <param name="startRev">起始版本</param>
+        /// <param name="rev">获取库中的特定版本：最新版本为$HEAD$。</param>
+        /// <returns>变更日志数据集合</returns>
+        public ChangeLog[] GetReversionLogs(string RepositoryId, long startRev, string rev)
+        {
+            ProjectRepository repos = new ProjectRepository() { RepositoryId = RepositoryId };
+            repos.DataBind();
+
+            List<ChangeLog> logList = new List<ChangeLog>();
+            long targetVer =  Convert.ToInt64(repos.Reversion);
+
+            if (!rev.Equals("$HEAD$", StringComparison.InvariantCultureIgnoreCase))
+            {
+                targetVer = Convert.ToInt64(rev);
+            }
+
+            if (targetVer > startRev && startRev >= 1)
+            {
+                string logDir = string.Concat(RootDirName, "\\", RepositoryId, "\\", "log", "\\");
+
+                //Path.Combine(logDir, "Rev" +log.ReversionId+".dat")
+                string logFile = string.Empty;
+                for (; targetVer >= startRev; targetVer--)
+                {
+                    logFile = Path.Combine(logDir, "Rev" + targetVer + ".dat");
+                    if (!File.Exists(logFile))
+                    {
+                        Console.WriteLine("版本为[{0}]的变更日志已不存在！", targetVer);
+                    }
+                    else
+                    {
+                        logList.Add(File.ReadAllBytes(logFile).GetObject<ChangeLog>());
+                    }
+                }
+            }
+            return logList.ToArray();
+        }
         #endregion
     }
 

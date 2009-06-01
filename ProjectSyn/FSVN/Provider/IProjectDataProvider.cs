@@ -69,6 +69,15 @@ namespace FSVN.Provider
         /// <param name="rev">获取库中的特定版本：最新版本为$HEAD$。</param>
         /// <returns>如果存在则返回项目数据，否则为null。</returns>
         ProjectData GetProjectData(string RepositoryId, string IdentityName, string rev);
+
+        /// <summary>
+        /// 获取变更到指定版本的变更日志
+        /// </summary>
+        /// <param name="RepositoryId">版本库标志编号</param>
+        /// <param name="startRev">起始版本</param>
+        /// <param name="rev">获取库中的特定版本：最新版本为$HEAD$。</param>
+        /// <returns>变更日志数据集合</returns>
+        ChangeLog[] GetReversionLogs(string RepositoryId, long startRev, string rev);
         #endregion
 
         /*移动、重命名 项目数据*/

@@ -144,6 +144,25 @@ namespace FSVN.UnitTest
         }
 
         [Test]
+        public void GetAllLog()
+        {
+            ChangeLog[] logs = Repos.GetReversionLogs(1, "$HEAD$");
+            foreach (ChangeLog log in logs)
+            {
+                Console.WriteLine("Rev:{1}, Msg:{0}", log.Message, log.ReversionId);
+                ChangeAction[] chs = (ChangeAction[])log.Summary.GetObject<ChangeAction[]>();
+                if (chs != null && chs.Length > 0)
+                {
+                    foreach (ChangeAction c in chs)
+                    {
+                        Console.WriteLine("ID:{0}\r\n---------------------------------------------\r\n Msg:{1}", string.Join("\n", c.IdentityNames), c.GetSummary());
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+
+        [Test]
         public void DataEntityTest()
         {
             ProjectData dat = new ProjectData { RawConfig = new RawData { IsText = false, IsCompressed = false }.GetBytes() };
