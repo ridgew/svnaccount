@@ -10,8 +10,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FSVN</RootNamespace>
     <AssemblyName>FSVN</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{14822709-B5A1-4724-98CA-57A101D1B079};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,9 +51,21 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Workflow.Activities">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Workflow.ComponentModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Workflow.Runtime">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activity\FileMoveActivity.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Config\ObjectDataAttribute.cs" />
     <Compile Include="Config\XmlSerializeSectionHandler.cs" />
     <Compile Include="Data\ChangeAction.cs" />
@@ -77,6 +92,7 @@
     <Compile Include="Provider\IRawCompressProvider.cs" />
     <Compile Include="Provider\IRawDataProvider.cs" />
     <Compile Include="Provider\IRawSumProvider.cs" />
+    <Compile Include="Server\IWorkflowRuntimeHost.cs" />
     <Compile Include="SynSvnFile.cs" />
     <Compile Include="UnitTest\ProjectDataTest.cs" />
     <Compile Include="UnitTest\ProjectTest.cs" />
@@ -91,9 +107,13 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Client\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
+	   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Windows Workflow Foundation\v3.0\Workflow.Targets" />
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">

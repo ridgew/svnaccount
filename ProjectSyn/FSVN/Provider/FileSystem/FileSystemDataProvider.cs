@@ -234,6 +234,7 @@ namespace FSVN.Provider
         /// </summary>
         /// <param name="datArray">项目数据标志队列集合</param>
         /// <param name="memo">变更备忘</param>
+        /// <remarks>[TODO]</remarks>
         public void Delete(ProjectDataID[] datArray, string memo)
         {
             if (datArray == null || datArray.Length < 1) return;
@@ -268,10 +269,12 @@ namespace FSVN.Provider
                     //备份
                     File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
 
-                    //移动文件 [fsvnFile].r*
-
                     //删除
                     File.Delete(fsvnFile);
+
+                    #region 移动文件 [fsvnFile].r*
+
+                    #endregion
                 }
                 else
                 {
