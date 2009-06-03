@@ -63,7 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activity\FileMoveActivity.cs">
+    <Compile Include="Activities\FileMoveActivity.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Config\ObjectDataAttribute.cs" />
