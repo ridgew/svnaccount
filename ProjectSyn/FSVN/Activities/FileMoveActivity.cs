@@ -20,6 +20,8 @@ namespace FSVN.Activities
         /// </returns>
         protected override ActivityExecutionStatus Execute(ActivityExecutionContext executionContext)
         {
+            //System.Workflow.ComponentModel.Compiler.TypeProvider
+            //TransactionScopeActivity
             return base.Execute(executionContext);
         }
 
