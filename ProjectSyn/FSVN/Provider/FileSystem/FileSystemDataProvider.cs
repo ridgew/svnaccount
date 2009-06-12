@@ -54,10 +54,11 @@ namespace FSVN.Provider
             }
         }
 
-        private  string[] subDirs = new string[] { "dat",  //数据目录
-                    "log",      //日志目录
-                    "$del",     //删除备份目录
-                    "$mov"};    //重命名和移动目录
+        private string[] subDirs = new string[] { "dat",  //数据目录
+                    "log",          //日志目录
+                    "$del",         //删除备份目录
+                    "$mov",         //重命名和移动目录
+                    "$tree" };      //版本库结构数目录
 
         private void InitialRepositoryDir(string reposDir)
         {
@@ -92,7 +93,11 @@ namespace FSVN.Provider
              /// <summary>
              /// 重命名和移动目录
              /// </summary>
-             Move = 3
+             Move = 3,
+             /// <summary>
+             /// 版本目录结构树目录
+             /// </summary>
+             Tree = 4
         }
 
         /// <summary>
@@ -271,7 +276,7 @@ namespace FSVN.Provider
                     //备份
                     File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
 
-                    string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Move) + "\\rev" + oldData.Reversion;
+                    string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + oldData.Reversion;
                     targetDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + targetDir);
                     if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
@@ -291,7 +296,7 @@ namespace FSVN.Provider
                 {
                     //目录删除 (.del)
                     string oldDir = datDir + datArray[i].IdentityName.Replace('/', '\\');
-                    string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + repos.Reversion;
+                    string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + repos.Reversion;  //TODO:记录目录的版本号
                     delDir += datArray[i].GetParentName();
                     delDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + delDir);
 
@@ -354,6 +359,8 @@ namespace FSVN.Provider
 
                 listRemove.Add(removArray[i].IdentityName);
                 fsvnFile = datDir + removArray[i].IdentityName.Replace('/', '\\') + ".fsvn";
+
+                //移动目录记录:$mov\rev[n]\fsvnFile.fsvn
 
                 if (File.Exists(fsvnFile))
                 {
