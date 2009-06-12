@@ -52,6 +52,14 @@ namespace FSVN.Provider
         /// <param name="memo">变更备忘</param>
         void Delete(ProjectDataID[] datArray, string memo);
 
+
+        /// <summary>
+        /// 移动（重命名）的项目数据对列
+        /// </summary>
+        /// <param name="removArray">项目数据变更标识集</param>
+        /// <param name="memo">操作备忘</param>
+        void Remove(DataMoveAction[] removArray, string memo);
+
         /// <summary>
         /// 获取指定容器标志内的项目数据集合
         /// </summary>

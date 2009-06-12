@@ -70,9 +70,11 @@
     <Compile Include="Config\XmlSerializeSectionHandler.cs" />
     <Compile Include="Data\ChangeAction.cs" />
     <Compile Include="Data\ChangeLog.cs" />
+    <Compile Include="Data\DataMoveAction.cs" />
     <Compile Include="Data\IIdentified.cs" />
     <Compile Include="Data\IRevertable.cs" />
     <Compile Include="Data\ModuleData.cs" />
+    <Compile Include="Data\NotExistRepositoryItemException.cs" />
     <Compile Include="Data\ProjectDataID.cs" />
     <Compile Include="Data\ProjectModule.cs" />
     <Compile Include="Data\ProjectRepository.cs" />

@@ -38,7 +38,7 @@ namespace FSVN.Data
         }
 
         /// <summary>
-        /// 获取父级名称
+        /// 获取父级名称，没有父级则为字符空。
         /// </summary>
         public string GetParentName()
         {

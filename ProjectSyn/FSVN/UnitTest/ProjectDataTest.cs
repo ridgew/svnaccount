@@ -133,8 +133,10 @@ namespace FSVN.UnitTest
 
         [Test]
         public void TempRemove()
-        { 
-        
+        {
+            Repos.Commit(new ProjectDataID[] { 
+                new ProjectDataID { IdentityName = "test.htm", RepositoryId = Repos.RepositoryId }
+            }, "移动测试");
         }
 
         [Test]

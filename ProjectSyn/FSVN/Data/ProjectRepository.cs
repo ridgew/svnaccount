@@ -303,6 +303,31 @@ namespace FSVN.Data
         }
         #endregion
 
+        #region 移动
+
+        /// <summary>
+        /// 移动（重命名）的项目数据对列
+        /// </summary>
+        /// <param name="removArray">项目数据变更标识集</param>
+        /// <param name="memo">操作备忘</param>
+        /// <returns>如提交成功则返回提交之后的最新版本号</returns>
+        public string Remove(DataMoveAction[] removArray, string memo)
+        {
+            string Rev = GetNextReversionID();
+            Provider.Remove(removArray, memo);
+
+            ////更新版本库数据
+            //this.Reversion = Rev;
+            //this.Author = "ridge";
+            //this.ModifiedDateTimeUTC = DateTime.Now.ToUniversalTime();
+            //Provider.StoreRepositoryData(this);
+
+            return Rev;
+        }
+
+        #endregion
+
+
         /// <summary>
         /// 同步两个版本库
         /// </summary>

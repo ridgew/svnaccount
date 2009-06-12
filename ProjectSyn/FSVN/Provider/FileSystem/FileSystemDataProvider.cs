@@ -136,7 +136,8 @@ namespace FSVN.Provider
         {
             string datDir = string.Concat(RootDirName, "\\", repositoryID, "\\", "dat", "\\");
             string localFilePath = Path.Combine(datDir, identityName.Replace('/', '\\'));
-            return File.Exists(localFilePath);
+            //文件或目录
+            return File.Exists(localFilePath + ".fsvn") || File.Exists(localFilePath + "\\.fsvn");
         }
 
         /// <summary>
@@ -234,7 +235,7 @@ namespace FSVN.Provider
         /// </summary>
         /// <param name="datArray">项目数据标志队列集合</param>
         /// <param name="memo">变更备忘</param>
-        /// <remarks>[TODO]</remarks>
+        /// <remarks>[TODO:Practice]</remarks>
         public void Delete(ProjectDataID[] datArray, string memo)
         {
             if (datArray == null || datArray.Length < 1) return;
@@ -253,8 +254,9 @@ namespace FSVN.Provider
             {
                 if (!Exists(repos.RepositoryId, datArray[i].IdentityName))
                 {
-                    Console.WriteLine("{0} 在版本库中不存在！", datArray[i].IdentityName);
-                    continue;
+                    //Console.WriteLine("{0} 在版本库中不存在！", datArray[i].IdentityName);
+                    //continue;
+                    throw new NotExistRepositoryItemException(string.Format("{0} 在版本库中不存在！", datArray[i].IdentityName));
                 }
 
                 ListDel.Add(datArray[i].IdentityName);
@@ -269,18 +271,27 @@ namespace FSVN.Provider
                     //备份
                     File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
 
-                    //删除
-                    File.Delete(fsvnFile);
+                    string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Move) + "\\rev" + oldData.Reversion;
+                    targetDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + targetDir);
+                    if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
 
                     #region 移动文件 [fsvnFile].r*
-
+                    DirectoryInfo movDir = new DirectoryInfo(Path.GetDirectoryName(fsvnFile));
+                    foreach (FileInfo rf in movDir.GetFiles( Path.GetFileName(fsvnFile) + ".r*"))
+                    {
+                        rf.MoveTo(targetDir + "\\" + rf.Name);
+                        Console.WriteLine("移动文件：{0} -> {1} ", rf.FullName, targetDir + "\\" + rf.Name);
+                    }
                     #endregion
+                    
+                    //删除
+                    File.Delete(fsvnFile);
                 }
                 else
                 {
                     //目录删除 (.del)
                     string oldDir = datDir + datArray[i].IdentityName.Replace('/', '\\');
-                    string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + ReversionID;
+                    string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + repos.Reversion;
                     delDir += datArray[i].GetParentName();
                     delDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + delDir);
 
@@ -313,6 +324,110 @@ namespace FSVN.Provider
             #endregion
         }
 
+
+        /// <summary>
+        /// 移动（重命名）的项目数据对列
+        /// </summary>
+        /// <param name="removArray">项目数据变更标识集</param>
+        /// <param name="memo">操作备忘</param>
+        /// <remarks>[TODO]</remarks>
+        public void Remove(DataMoveAction[] removArray, string memo)
+        {
+            if (removArray == null || removArray.Length < 1) return;
+            int total = removArray.Length;
+            DataMoveAction CommonData = removArray[0];
+            ProjectRepository repos = new ProjectRepository() { RepositoryId = CommonData.RepositoryId };
+
+            List<string> listRemove = new List<string>();
+
+            string ReversionID = repos.GetNextReversionID();
+            string datDir = string.Concat(RootDirName, "\\", repos.RepositoryId, "\\", "dat", "\\");
+            string logDir = string.Concat(RootDirName, "\\", repos.RepositoryId, "\\", "log", "\\");
+            string fsvnFile = string.Empty;
+
+            for (int i = 0; i < total; i++)
+            {
+                if (!Exists(repos.RepositoryId, removArray[i].IdentityName))
+                {
+                    throw new NotExistRepositoryItemException(string.Format("{0} 在版本库中不存在！", removArray[i].IdentityName));
+                }
+
+                listRemove.Add(removArray[i].IdentityName);
+                fsvnFile = datDir + removArray[i].IdentityName.Replace('/', '\\') + ".fsvn";
+
+                if (File.Exists(fsvnFile))
+                {
+                    #region 文件移动
+                    if (removArray[i].IsSameParent())
+                    {
+                        //重命名
+                    }
+                    else
+                    { 
+                        //目标库不存在则自动创建
+                    }
+                    
+                    //byte[] fileDat = File.ReadAllBytes(fsvnFile);
+                    //ProjectData oldData = fileDat.GetObject<ProjectData>();
+
+                    ////备份
+                    //File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
+
+                    //string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Move) + "\\rev" + oldData.Reversion;
+                    //targetDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + targetDir);
+                    //if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+
+                    //#region 移动文件 [fsvnFile].r*
+                    //DirectoryInfo movDir = new DirectoryInfo(Path.GetDirectoryName(fsvnFile));
+                    //foreach (FileInfo rf in movDir.GetFiles(Path.GetFileName(fsvnFile) + ".r*"))
+                    //{
+                    //    rf.MoveTo(targetDir + "\\" + rf.Name);
+                    //    Console.WriteLine("移动文件：{0} -> {1} ", rf.FullName, targetDir + "\\" + rf.Name);
+                    //}
+                    //#endregion
+
+                    ////删除
+                    //File.Delete(fsvnFile);
+                    #endregion
+                }
+                else
+                {
+                    #region 目录移动 (.mov)
+                    //string oldDir = datDir + removArray[i].IdentityName.Replace('/', '\\');
+                    //string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + repos.Reversion;
+                    //delDir += removArray[i].GetParentName();
+                    //delDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + delDir);
+
+                    //Console.WriteLine("创建目录：{0}", delDir);
+                    //Console.WriteLine("移动目录：{0} -> {1} ", oldDir, delDir + "\\" + removArray[i].GetName());
+
+                    //if (!Directory.Exists(delDir)) Directory.CreateDirectory(delDir);
+                    //Directory.Move(oldDir, delDir + "\\" + removArray[i].GetName());
+                    #endregion
+                }
+
+                //更新目录下的 .fsvn文件
+
+                Console.WriteLine("正在移动：{0}", removArray[i].IdentityName);
+            }
+
+            #region 变更日志
+            //List<ChangeAction> cActs = new List<ChangeAction>();
+            //if (ListDel.Count > 0)
+            //{
+            //    cActs.Add(new DeleteAction { IdentityNames = ListDel.ToArray() });
+            //}
+
+            //ChangeLog log = new ChangeLog();
+            //log.Author = "ridge";
+            //log.Message = memo;
+            //log.RepositoryId = repos.RepositoryId;
+            //log.ReversionId = ReversionID;
+            //log.Summary = cActs.ToArray().GetBytes();
+            //File.WriteAllBytes(Path.Combine(logDir, "Rev" + log.ReversionId + ".dat"), log.GetBytes());
+            #endregion
+        }
+        
         /// <summary>
         /// 获取指定容器标志内的项目数据集合
         /// </summary>
@@ -398,6 +513,7 @@ namespace FSVN.Provider
             }
             return logList.ToArray();
         }
+
         #endregion
     }
 
