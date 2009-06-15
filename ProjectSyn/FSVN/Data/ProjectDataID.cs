@@ -10,15 +10,28 @@ namespace FSVN.Data
     [Serializable]
     public class ProjectDataID : MarshalByRefObject
     {
+        private string _i;
         /// <summary>
-        /// 数据标志名称（在同一版本库内不重复）
+        /// 获取或设置数据标志名称（在同一版本库内不重复）
         /// </summary>
-        public string IdentityName { get; set; }
+        public string IdentityName 
+        {
+            get { return _i; }
+            set 
+            {
+                _i = "/" + value.TrimStart('/');
+            }
+        }
 
+        private string _r;
         /// <summary>
-        /// 版本库编号
+        /// 获取或设置版本库编号
         /// </summary>
-        public string RepositoryId { get; set; }
+        public string RepositoryId 
+        {
+            get { return _r; }
+            set { _r = value; }
+        }
 
         /// <summary>
         /// 获取名称（目录或文件名）

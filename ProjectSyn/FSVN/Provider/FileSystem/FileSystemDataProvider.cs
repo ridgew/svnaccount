@@ -470,8 +470,21 @@ namespace FSVN.Provider
         /// <param name="ContainerIdentityName">包含容器的项目数据标志号，为null则为根下的项目数据。</param>
         /// <param name="rev">获取库中的特定版本：最新版本为$HEAD$。</param>
         /// <returns>项目数据集合</returns>
+        /// <remarks>[TODO]</remarks>
         public ProjectData[] GetDataList(string RepositoryId, string ContainerIdentityName, string rev)
         {
+            ProjectRepository repos = new ProjectRepository() { RepositoryId = RepositoryId };
+            string datDir = GetSubDirByType(RepositoryId, RepositoryDirectory.Data);
+            string treeDir = GetSubDirByType(RepositoryId, RepositoryDirectory.Tree);
+
+            string fsvnFile = Path.Combine(datDir, ".fsvn");
+
+            //获取指定版本的目录结构树
+            if (!rev.Equals("$HEAD$", StringComparison.InvariantCultureIgnoreCase))
+            {
+                fsvnFile = Path.Combine(treeDir, "rev" + rev + ".fsvn");
+            }
+
             throw new NotImplementedException();
         }
 
