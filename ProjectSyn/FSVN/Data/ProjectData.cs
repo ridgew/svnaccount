@@ -31,7 +31,15 @@ namespace FSVN.Data
         public string IdentityName
         {
             get { return i; }
-            set { i = value; }
+            set 
+            {
+                ProjectDataID iDat = new ProjectDataID() { IdentityName = value, RepositoryId = RepositoryId };
+                Name = iDat.GetName();
+                ContainerIdentityName = iDat.GetParentName();
+                Deepth = iDat.GetDeepth();
+
+                i = value; 
+            }
         }
 
         private string p;

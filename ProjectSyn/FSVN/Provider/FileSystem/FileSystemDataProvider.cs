@@ -344,12 +344,18 @@ namespace FSVN.Provider
             ProjectRepository repos = new ProjectRepository() { RepositoryId = CommonData.RepositoryId };
 
             List<string> listRemove = new List<string>();
+            List<string> listTarget = new List<string>();
 
             string ReversionID = repos.GetNextReversionID();
             string datDir = string.Concat(RootDirName, "\\", repos.RepositoryId, "\\", "dat", "\\");
             string logDir = string.Concat(RootDirName, "\\", repos.RepositoryId, "\\", "log", "\\");
             string fsvnFile = string.Empty;
 
+            List<DataMoveAction> fMoveList = new List<DataMoveAction>();
+            List<DataMoveAction> fRenameList = new List<DataMoveAction>();
+            List<DataMoveAction> dMoveList = new List<DataMoveAction>();
+            List<DataMoveAction> dRenameList = new List<DataMoveAction>();
+            
             for (int i = 0; i < total; i++)
             {
                 if (!Exists(repos.RepositoryId, removArray[i].IdentityName))
@@ -358,80 +364,102 @@ namespace FSVN.Provider
                 }
 
                 listRemove.Add(removArray[i].IdentityName);
+                listTarget.Add(removArray[i].NewIdentityName);
+
                 fsvnFile = datDir + removArray[i].IdentityName.Replace('/', '\\') + ".fsvn";
 
-                //移动目录记录:$mov\rev[n]\fsvnFile.fsvn
-
+                //移动目录
                 if (File.Exists(fsvnFile))
                 {
+                    string nFsvnFile = datDir + removArray[i].NewIdentityName.Replace('/', '\\') + ".fsvn";
                     #region 文件移动
                     if (removArray[i].IsSameParent())
                     {
                         //重命名
+                        fRenameList.Add(removArray[i]);
                     }
                     else
                     { 
                         //目标库不存在则自动创建
+                        fMoveList.Add(removArray[i]);
+
+                        ProjectDataID nId = new ProjectDataID { IdentityName = removArray[i].NewIdentityName, RepositoryId = repos.RepositoryId };
+                        string parentIdName = nId.GetParentName();
+                        if (parentIdName != string.Empty && !Exists(repos.RepositoryId, parentIdName))
+                        {
+                            //完善默认数据值获取
+                            ProjectData dDat = new ProjectData() 
+                            { 
+                                IncludeBinary = false, CreateDateTimeUTC = DateTime.Now.ToUniversalTime(),
+                                IdentityName = parentIdName
+                            };
+                            Store(new ProjectData[] { dDat }, "[AUTO CREATE]");  
+                        }
                     }
-                    
-                    //byte[] fileDat = File.ReadAllBytes(fsvnFile);
-                    //ProjectData oldData = fileDat.GetObject<ProjectData>();
-
-                    ////备份
-                    //File.WriteAllBytes(fsvnFile + ".r" + oldData.Reversion, fileDat);
-
-                    //string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Move) + "\\rev" + oldData.Reversion;
-                    //targetDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + targetDir);
-                    //if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
-
-                    //#region 移动文件 [fsvnFile].r*
-                    //DirectoryInfo movDir = new DirectoryInfo(Path.GetDirectoryName(fsvnFile));
-                    //foreach (FileInfo rf in movDir.GetFiles(Path.GetFileName(fsvnFile) + ".r*"))
-                    //{
-                    //    rf.MoveTo(targetDir + "\\" + rf.Name);
-                    //    Console.WriteLine("移动文件：{0} -> {1} ", rf.FullName, targetDir + "\\" + rf.Name);
-                    //}
-                    //#endregion
-
-                    ////删除
-                    //File.Delete(fsvnFile);
                     #endregion
+                    File.Move(fsvnFile, nFsvnFile);
                 }
                 else
                 {
                     #region 目录移动 (.mov)
-                    //string oldDir = datDir + removArray[i].IdentityName.Replace('/', '\\');
-                    //string delDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Delete) + "\\rev" + repos.Reversion;
-                    //delDir += removArray[i].GetParentName();
-                    //delDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + delDir);
+                    if (removArray[i].IsSameParent())
+                    {
+                        //重命名
+                        dRenameList.Add(removArray[i]);
+                    }
+                    else
+                    {
+                        dMoveList.Add(removArray[i]);
+                    }
 
-                    //Console.WriteLine("创建目录：{0}", delDir);
-                    //Console.WriteLine("移动目录：{0} -> {1} ", oldDir, delDir + "\\" + removArray[i].GetName());
-
-                    //if (!Directory.Exists(delDir)) Directory.CreateDirectory(delDir);
-                    //Directory.Move(oldDir, delDir + "\\" + removArray[i].GetName());
+                    string oldDir = datDir + removArray[i].IdentityName.Replace('/', '\\');
+                    string newDir = datDir + removArray[i].NewIdentityName.Replace('/', '\\');
+                    if (!Directory.Exists(newDir)) Directory.CreateDirectory(newDir);
+                    Directory.Move(oldDir, newDir);
                     #endregion
                 }
 
                 //更新目录下的 .fsvn文件
-
-                Console.WriteLine("正在移动：{0}", removArray[i].IdentityName);
+                Console.WriteLine("正在移动：{0}-{1}", removArray[i].IdentityName, removArray[i].NewIdentityName);
             }
 
-            #region 变更日志
-            //List<ChangeAction> cActs = new List<ChangeAction>();
-            //if (ListDel.Count > 0)
-            //{
-            //    cActs.Add(new DeleteAction { IdentityNames = ListDel.ToArray() });
-            //}
+            #region 变更存储
+            string targetDir = GetSubDirByType(repos.RepositoryId, RepositoryDirectory.Move) + "\\rev" + ReversionID;
+            targetDir = Path.Combine(RootDirName, repos.RepositoryId + "\\" + targetDir);
+            if (!Directory.Exists(targetDir)) Directory.CreateDirectory(targetDir);
+            if (fRenameList.Count > 0)
+            {
+                File.WriteAllBytes(targetDir + "\\FileRename.fsvn", fRenameList.ToArray().GetBytes());
+            }
+            if (fMoveList.Count > 0)
+            {
+                File.WriteAllBytes(targetDir + "\\FileMove.fsvn", fMoveList.ToArray().GetBytes());
+            }
 
-            //ChangeLog log = new ChangeLog();
-            //log.Author = "ridge";
-            //log.Message = memo;
-            //log.RepositoryId = repos.RepositoryId;
-            //log.ReversionId = ReversionID;
-            //log.Summary = cActs.ToArray().GetBytes();
-            //File.WriteAllBytes(Path.Combine(logDir, "Rev" + log.ReversionId + ".dat"), log.GetBytes());
+            if (dRenameList.Count > 0)
+            {
+                File.WriteAllBytes(targetDir + "\\DirRename.fsvn", dRenameList.ToArray().GetBytes());
+            }
+            if (dMoveList.Count > 0)
+            {
+                File.WriteAllBytes(targetDir + "\\DirMove.fsvn", dMoveList.ToArray().GetBytes()); 
+            }
+            #endregion
+
+            #region 变更日志
+            List<ChangeAction> cActs = new List<ChangeAction>();
+            if (listRemove.Count > 0)
+            {
+                cActs.Add(new MoveAction { IdentityNames = listRemove.ToArray(), TargetIdentityNames = listTarget.ToArray() });
+            }
+
+            ChangeLog log = new ChangeLog();
+            log.Author = "ridge";
+            log.Message = memo;
+            log.RepositoryId = repos.RepositoryId;
+            log.ReversionId = ReversionID;
+            log.Summary = cActs.ToArray().GetBytes();
+            File.WriteAllBytes(Path.Combine(logDir, "Rev" + log.ReversionId + ".dat"), log.GetBytes());
             #endregion
         }
         
