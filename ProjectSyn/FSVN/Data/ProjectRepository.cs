@@ -194,7 +194,7 @@ namespace FSVN.Data
         /// <returns>指定库版本的项目数据</returns>
         public ProjectData[] GetDataList(string ContainerIdentityName, string rev)
         {
-            return new ProjectData[0];
+            return Provider.GetDataList(RepositoryId, ContainerIdentityName, rev);
         }
 
         /// <summary>

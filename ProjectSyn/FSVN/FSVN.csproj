@@ -80,6 +80,7 @@
     <Compile Include="Data\ProjectRepository.cs" />
     <Compile Include="Data\RawData.cs" />
     <Compile Include="Data\SynOption.cs" />
+    <Compile Include="Data\TreeData.cs" />
     <Compile Include="FmqProject.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="ModuleGroup.cs" />
