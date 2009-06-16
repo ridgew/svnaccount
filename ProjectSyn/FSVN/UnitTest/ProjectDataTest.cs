@@ -170,6 +170,86 @@ namespace FSVN.UnitTest
             ProjectData dat = new ProjectData { RawConfig = new RawData { IsText = false, IsCompressed = false }.GetBytes() };
             //ProjectData dat2 = new ProjectData { RawConfig = Encoding.UTF8.GetBytes("Hello Word!") };
         }
+
+        [Test]
+        public void 新建库测试()
+        { 
+        
+        }
+
+        [Test]
+        public void 现有文件系统创建库测试()
+        {
+
+        }
+
+        [Test]
+        public void 所有操作测试()
+        {
+            /*
+             1. 新建库(存在则清空)
+             2. 添加文件testInRoot1.html、testInRoot2.html、testInRoot3.html
+             3. 添加目录js
+             4. 添加文件js/main.js
+                   获取js目录的目录树结构
+
+             5. 添加文件 css/test.css (自动创建目录)
+                   获取css目录的目录树结构
+
+             6. 获取testInRoot2.html 修改文件 testInRoot2.html 并提交
+             7. 创建目录bak
+             8. 移动testInRoot1.html、testInRoot3.html到bak目录
+             9. 重命名bak/testInRoot1.html 为 bak/1.html
+                重命名bak/testInRoot3.html 为 bak/3.html
+             10. 删除文件bak/3.html
+             11. 添加文件bak/3.html 新内容为"I'm come back."
+             12. 删除目录bak
+             13. 获取最新的目录树结构
+             */
+        }
+
+        [Test]
+        public void 获取指定版测试()
+        {
+            /*
+             Sub CreateCab(ByVal CabFileName, ByVal MakeSignable, ByVal ExtraSpace, ByVal Use10Format)
+             Sub AddFile(ByVal FileName, ByVal FileNameInCab)
+             Sub CopyFile(ByVal CabName, ByVal FileNameInCab)
+             Sub CloseCab
+             */
+
+            //获取指定版本为cab文件包
+            #region CLR
+            //Type cabType = Type.GetTypeFromProgID("MakeCab.MakeCab.1", false);
+            //if (cabType == null) return;
+
+            //Object cabInstance = Activator.CreateInstance(cabType);
+
+            //cabType.InvokeMember("CreateCab", System.Reflection.BindingFlags.InvokeMethod, Type.DefaultBinder, cabInstance,
+            //    new object[] { @"c:\a.cab", false, false, false });
+
+            //cabType.InvokeMember("AddFile", System.Reflection.BindingFlags.InvokeMethod, null, cabInstance,
+            //    new object[] { @"c:\bootbak.ini", "bootbak.ini" });
+
+            //cabType.InvokeMember("CloseCab", System.Reflection.BindingFlags.InvokeMethod, null, cabInstance,new object[0]);
+
+            //while (System.Runtime.InteropServices.Marshal.ReleaseComObject(cabInstance) > 0) ;
+            //cabInstance = null;
+            #endregion
+
+            #region COM Wrap
+            //IMakeCab cabTool = (IMakeCab)COMWrapper.CreateInstance(typeof(IMakeCab));
+            //cabTool.CreateCab(@"c:\c.cab", false, false, false);
+            //cabTool.AddFile(@"c:\bootbak.ini", "a\\1.ini");
+            //cabTool.CloseCab();
+
+            ////cabTool.CopyFile(@"c:\b.cab", "2.ini");
+            
+            //cabTool.Dispose();
+            #endregion
+
+        }
+
     }
 }
 #endif

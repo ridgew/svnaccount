@@ -66,6 +66,7 @@
     <Compile Include="Activities\FileMoveActivity.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Client\IFSVNClient.cs" />
     <Compile Include="Config\ObjectDataAttribute.cs" />
     <Compile Include="Config\XmlSerializeSectionHandler.cs" />
     <Compile Include="Data\ChangeAction.cs" />
@@ -99,19 +100,22 @@
     <Compile Include="SynSvnFile.cs" />
     <Compile Include="UnitTest\ProjectDataTest.cs" />
     <Compile Include="UnitTest\ProjectTest.cs" />
+    <Compile Include="Util\IMakeCab.cs" />
+    <Compile Include="Util\SafeCom\ComEventProvider.cs" />
+    <Compile Include="Util\SafeCom\ComEventsAttribute.cs" />
+    <Compile Include="Util\SafeCom\ComEventSink.cs" />
+    <Compile Include="Util\SafeCom\ComProgIdAttribute.cs" />
     <Compile Include="Util\CSharp3Ext.cs" />
     <Compile Include="Util\ExtensionHelper.cs" />
     <Compile Include="Util\IProjectPackage.cs" />
     <Compile Include="Util\ProjectArchive.cs" />
+    <Compile Include="Util\SafeCom\COMWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="%40Docs\FSVN-Readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Client\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
