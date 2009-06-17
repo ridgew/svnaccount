@@ -250,6 +250,12 @@ namespace FSVN.UnitTest
 
         }
 
+        [Test]
+        public void _完善版本测试()
+        { 
+            //Client.IFSVNClient client = 
+        }
+
     }
 }
 #endif

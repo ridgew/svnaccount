@@ -11,7 +11,7 @@
     <RootNamespace>FSVN</RootNamespace>
     <AssemblyName>FSVN</AssemblyName>
     <ProjectTypeGuids>{14822709-B5A1-4724-98CA-57A101D1B079};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
@@ -51,21 +51,9 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Workflow.Activities">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Workflow.ComponentModel">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Workflow.Runtime">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activities\FileMoveActivity.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Client\IFSVNClient.cs" />
     <Compile Include="Config\ObjectDataAttribute.cs" />
     <Compile Include="Config\XmlSerializeSectionHandler.cs" />
@@ -96,7 +84,6 @@
     <Compile Include="Provider\IRawCompressProvider.cs" />
     <Compile Include="Provider\IRawDataProvider.cs" />
     <Compile Include="Provider\IRawSumProvider.cs" />
-    <Compile Include="Server\IWorkflowRuntimeHost.cs" />
     <Compile Include="SynSvnFile.cs" />
     <Compile Include="UnitTest\ProjectDataTest.cs" />
     <Compile Include="UnitTest\ProjectTest.cs" />
