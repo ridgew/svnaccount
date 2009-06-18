@@ -30,15 +30,15 @@ namespace FSVN.Data
             set { _r = value; }
         }
 
-        private string _p;
-        /// <summary>
-        /// 版本库编号
-        /// </summary>
-        public string RepositoryId
-        {
-            get { return _p; }
-            set { _p = value; }
-        }
+        //private string _p;
+        ///// <summary>
+        ///// 版本库编号
+        ///// </summary>
+        //public string RepositoryId
+        //{
+        //    get { return _p; }
+        //    set { _p = value; }
+        //}
 
         //private string c;
         ///// <summary>
@@ -60,32 +60,32 @@ namespace FSVN.Data
             set { d = value; }
         }
 
-        private TreeItem[] _c = new TreeItem[0];
-        /// <summary>
-        /// 自己树数据项
-        /// </summary>
-        public TreeItem[] ChildItems
-        {
-            get { return _c; }
-            set { _c = value; }
-        }
+        //private TreeItem[] _c = new TreeItem[0];
+        ///// <summary>
+        ///// 自己树数据项
+        ///// </summary>
+        //public TreeItem[] ChildItems
+        //{
+        //    get { return _c; }
+        //    set { _c = value; }
+        //}
 
 	}
 
-    /// <summary>
-    /// 结构树数据项根
-    /// </summary>
-    [Serializable]
-    public class RootTreeItem
-    {
-        private TreeItem[] _i = new TreeItem[0];
-        /// <summary>
-        /// 数据项集合
-        /// </summary>
-        public TreeItem[] Items
-        {
-            get { return _i; }
-            set { _i = value; }
-        }
-    }
+    ///// <summary>
+    ///// 结构树数据项根
+    ///// </summary>
+    //[Serializable]
+    //public class RootTreeItem
+    //{
+    //    private TreeItem[] _i = new TreeItem[0];
+    //    /// <summary>
+    //    /// 数据项集合
+    //    /// </summary>
+    //    public TreeItem[] Items
+    //    {
+    //        get { return _i; }
+    //        set { _i = value; }
+    //    }
+    //}
 }
