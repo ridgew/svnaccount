@@ -137,35 +137,32 @@ namespace Vbyte.DataSource
         /// 当前数据版本的签名作者
         /// </summary>
         string GetSignedAuthor();
-
-        /// <summary>
-        /// 获取所在的版本库名称
-        /// </summary>
-        string GetRepositoryName();
     }
 
     /// <summary>
     /// 版本控制的数据存储库
     /// </summary>
-    public interface IVersionControlStorage : IDataStorage, IVersionControl
+    public interface IVersionControlStorage : IDataStorage
     {
         /// <summary>
         /// 获取相关实例类型的指定版本
         /// </summary>
+        /// <param name="repositoryName">版本仓库名</param>
         /// <param name="identityName">数据标志号</param>
         /// <param name="rev">版本号</param>
         /// <returns>如果存在该数据则返回，否则为null。</returns>
-        IDataItem GetReversionData(string identityName, long rev);
+        IDataItem GetReversionData(string repositoryName, string identityName, long rev);
 
         /// <summary>
         /// 获取满足指定标志的数据集合
         /// </summary>
+        /// <param name="repositoryName">版本仓库名</param>
         /// <param name="containerIdentityName">父级容器标识名称，若为null或空则获取顶层相关数据。</param>
         /// <param name="filter">判断匹配规则</param>
         /// <param name="isMatch">匹配方向：true则匹配，false则为不匹配。</param>
         /// <param name="rev">版本号</param>
         /// <returns>如果存在则返回集合，否则为null或空数组。</returns>
-        IDataItem[] GetDataList(string containerIdentityName, Predicate<IDataItem> filter, bool isMatch, long rev);
+        IDataItem[] GetDataList(string repositoryName, string containerIdentityName, Predicate<IDataItem> filter, bool isMatch, long rev);
     }
 
     /// <summary>

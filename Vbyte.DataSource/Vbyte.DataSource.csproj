@@ -36,11 +36,14 @@
       <HintPath>..\ProjectSyn\FSVN\bin\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractData.cs" />
+    <Compile Include="Cache\Singleton.cs" />
+    <Compile Include="Configuration\XmlSerializeSectionHandler.cs" />
     <Compile Include="FileSystemStorage.cs" />
     <Compile Include="IDataStorage.cs" />
     <Compile Include="IDataExchange.cs">
@@ -51,10 +54,8 @@
     <Compile Include="Unitity\FileWrapHelper.cs" />
     <Compile Include="Unitity\SymmetricCryptography.cs" />
     <Compile Include="UnitTest\LocalFileDataTest.cs" />
+    <Compile Include="VersionControl\Repository.cs" />
     <Compile Include="VersionedFSStorage.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="VersionControl\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
