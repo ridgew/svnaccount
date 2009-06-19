@@ -53,7 +53,7 @@ namespace Vbyte.DataSource
         /// <param name="item">数据实例</param>
         public void Store(IDataItem item)
         {
-            string tarPath = Path.Combine(BaseDirectory, item.IdentityName.Replace('/', '\\'));
+            string tarPath = Path.Combine(BaseDirectory, item.IdentityName.Replace('/', '\\').Trim('\\'));
             if (item.IsContainer)
             {
                 Directory.CreateDirectory(tarPath);
@@ -68,7 +68,7 @@ namespace Vbyte.DataSource
         /// <param name="identityName">数据标志号</param>
         public void Remove(string identityName)
         {
-            string tarPath = Path.Combine(BaseDirectory, identityName.Replace('/', '\\'));
+            string tarPath = Path.Combine(BaseDirectory, identityName.Replace('/', '\\').Trim('\\'));
             if (File.Exists(tarPath))
             {
                 File.Delete(tarPath);
@@ -82,7 +82,7 @@ namespace Vbyte.DataSource
                 }
                 else
                 {
-                    throw new NullReferenceException("制定标识数据[" + identityName +"]在存储系统中不存在！");
+                    throw new NullReferenceException("指定标识数据[" + identityName +"]在存储系统中不存在！");
                 }
             }
         }
@@ -94,13 +94,13 @@ namespace Vbyte.DataSource
         /// <returns>如果存在该数据则返回，否则为null。</returns>
         public IDataItem GetData(string identityName)
         {
-            string tarPath = Path.Combine(BaseDirectory, identityName.Replace('/', '\\'));
+            string tarPath = Path.Combine(BaseDirectory, identityName.Replace('/', '\\').Trim('\\'));
             if (!File.Exists(tarPath))
             {
                 tarPath += "\\" + FS_DIRDAT;
                 if (!File.Exists(tarPath))
                 {
-                    throw new NullReferenceException("制定标识数据[" + identityName + "]在存储系统中不存在！");
+                    throw new NullReferenceException("指定标识数据[" + identityName + "]在存储系统中不存在！");
                 }
             }
             return FileWrapHelper.UnWrapObject(File.ReadAllBytes(tarPath)) as IDataItem;

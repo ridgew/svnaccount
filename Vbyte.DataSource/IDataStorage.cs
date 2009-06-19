@@ -160,11 +160,12 @@ namespace Vbyte.DataSource
         /// <summary>
         /// 获取满足指定标志的数据集合
         /// </summary>
+        /// <param name="containerIdentityName">父级容器标识名称，若为null或空则获取顶层相关数据。</param>
         /// <param name="filter">判断匹配规则</param>
         /// <param name="isMatch">匹配方向：true则匹配，false则为不匹配。</param>
         /// <param name="rev">版本号</param>
         /// <returns>如果存在则返回集合，否则为null或空数组。</returns>
-        IDataItem[] GetDataList(Predicate<IDataItem> filter, bool isMatch, long rev);
+        IDataItem[] GetDataList(string containerIdentityName, Predicate<IDataItem> filter, bool isMatch, long rev);
     }
 
     /// <summary>
