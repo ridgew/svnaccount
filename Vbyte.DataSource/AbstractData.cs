@@ -7,6 +7,7 @@ namespace Vbyte.DataSource
     /// <summary>
     /// 抽象数据基类
     /// </summary>
+    [Serializable]
     public abstract class AbstractData : IDataItem
     {
         #region IDataItem 成员
@@ -30,7 +31,7 @@ namespace Vbyte.DataSource
 
         private string _i;
         /// <summary>
-        /// 标志名称，类型URL地址定位等。
+        /// 标志名称，类型URL地址定位等(始终用/分隔目录)。
         /// </summary>
         /// <value></value>
         public virtual string IdentityName
@@ -146,6 +147,11 @@ namespace Vbyte.DataSource
         /// </summary>
         /// <returns></returns>
         public abstract IDataItem[] GetChildren();
+
+        /// <summary>
+        /// 相关属性数据绑定
+        /// </summary>
+        public abstract void DataBind();
 
         //[NonSerialized]
         //private IDataStorage _storage = null;

@@ -6,7 +6,7 @@ namespace Vbyte.DataSource
     /// 文本数据
     /// </summary>
     [Serializable]
-    public class TextData : BinaryData
+    public class TextData : AbstractData
     {
         private string _cs;
 
@@ -29,5 +29,30 @@ namespace Vbyte.DataSource
 
         }
 
+        /// <summary>
+        /// 上级数据项
+        /// </summary>
+        /// <returns></returns>
+        public override IDataItem GetParent()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 获取子级数据项
+        /// </summary>
+        /// <returns></returns>
+        public override IDataItem[] GetChildren()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 相关属性数据绑定
+        /// </summary>
+        public override void DataBind()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

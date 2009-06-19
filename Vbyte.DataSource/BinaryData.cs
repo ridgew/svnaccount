@@ -33,5 +33,13 @@ namespace Vbyte.DataSource
             throw new NotImplementedException();
         }
 
+
+        /// <summary>
+        /// 相关属性数据绑定
+        /// </summary>
+        public override void DataBind()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
