@@ -184,21 +184,22 @@ namespace Vbyte.DataSource.Utility
             {
                 nFStream.SetLength(nFileLen);
             }
-            nFStream.Position = 0;
 
+            nFStream.Position = 0;
             _internalFS.Position = 0;
             _internalFS.Read(buffer, 0, oldSize);
-
             nFStream.Write(buffer, 0, oldSize);
 
             #region 分段读取并写入
             nFStream.Position = idxNewSize;
-
             //Console.WriteLine("POS：{0}", idxNewSize);
+            //误差：5字节
 
             int currentRead = 0;
-            buffer = new byte[4096];
-            while ((currentRead = _internalFS.Read(buffer, 0, 4096)) != 0)
+
+            int lTest = 2107; //4096
+            buffer = new byte[lTest];
+            while ((currentRead = _internalFS.Read(buffer, 0, lTest)) != 0)
             {
                 Console.WriteLine("read:{0}", currentRead);
                 nFStream.Write(buffer, 0, currentRead);
