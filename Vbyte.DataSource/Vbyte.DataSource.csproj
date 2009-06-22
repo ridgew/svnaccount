@@ -51,10 +51,10 @@
     </Compile>
     <Compile Include="LocalFileData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Unitity\FileWrapHelper.cs" />
-    <Compile Include="Unitity\IdentityFileStore.cs" />
-    <Compile Include="Unitity\Kernel.cs" />
-    <Compile Include="Unitity\SymmetricCryptography.cs" />
+    <Compile Include="Utility\FileWrapHelper.cs" />
+    <Compile Include="Utility\IdentityFileStore.cs" />
+    <Compile Include="Utility\Kernel.cs" />
+    <Compile Include="Utility\SymmetricCryptography.cs" />
     <Compile Include="UnitTest\LocalFileDataTest.cs" />
     <Compile Include="UnitTest\SingleFileStoreTest.cs" />
     <Compile Include="VersionControl\Repository.cs" />

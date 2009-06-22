@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
-using Vbyte.DataSource.Unitity;
+using Vbyte.DataSource.Utility;
 
 namespace Vbyte.DataSource.UnitTest
 {
@@ -20,7 +20,7 @@ namespace Vbyte.DataSource.UnitTest
             dbDict.Add("/", new List<string>{ "test", "test.html", "js", "css", "index.html" });
 
             uint version = 105;  //max:4294967295
-            byte[] fileBytes = Unitity.FileWrapHelper.GetBytes(dbDict);
+            byte[] fileBytes = Utility.FileWrapHelper.GetBytes(dbDict);
 
             IdentityFileStore fStore = new IdentityFileStore(localFile);
             fStore.WriteReversion(version, fileBytes);
@@ -97,7 +97,7 @@ namespace Vbyte.DataSource.UnitTest
             //版本文件
             Dictionary<string, List<string>> dbDict = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
             dbDict.Add("/", new List<string>{ "test", "test.html", "js", "css", "index.html" });
-            System.IO.File.WriteAllBytes(localStruct, Unitity.FileWrapHelper.GetBytes(dbDict));
+            System.IO.File.WriteAllBytes(localStruct, Utility.FileWrapHelper.GetBytes(dbDict));
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Vbyte.DataSource.UnitTest
             //版本文件
             Dictionary<string, string> movDict = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             movDict.Add("mian", "main");
-            System.IO.File.WriteAllBytes(localStruct.Replace("fsvn.db", "mov.db"), Unitity.FileWrapHelper.GetBytes(movDict));
+            System.IO.File.WriteAllBytes(localStruct.Replace("fsvn.db", "mov.db"), Utility.FileWrapHelper.GetBytes(movDict));
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace Vbyte.DataSource.UnitTest
             //单一文件 自带版本
             Dictionary<long, List<string>> dbDict = new Dictionary<long, List<string>>();
             dbDict.Add(5, new List<string> { "test", "test.html", "js", "css", "index.html" });
-            System.IO.File.WriteAllBytes(localStruct.Replace("fsvn.db", "del.db"), Unitity.FileWrapHelper.GetBytes(dbDict));
+            System.IO.File.WriteAllBytes(localStruct.Replace("fsvn.db", "del.db"), Utility.FileWrapHelper.GetBytes(dbDict));
         }
 
     }
