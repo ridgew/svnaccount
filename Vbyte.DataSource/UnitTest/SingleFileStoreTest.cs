@@ -19,7 +19,7 @@ namespace Vbyte.DataSource.UnitTest
             Dictionary<string, List<string>> dbDict = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
             dbDict.Add("/", new List<string>{ "test", "test.html", "js", "css", "index.html" });
 
-            uint version = 105;  //max:4294967295
+            uint version = 45;  //max:4294967295
             byte[] fileBytes = Utility.FileWrapHelper.GetBytes(dbDict);
 
             IdentityFileStore fStore = new IdentityFileStore(localFile);
@@ -62,7 +62,7 @@ namespace Vbyte.DataSource.UnitTest
              */
             IdentityFileStore fStore = new IdentityFileStore(localFile);
 
-            byte[] fData = fStore.ReadReversion(100);
+            byte[] fData = fStore.ReadReversion(106);
             File.WriteAllBytes(localFile.Replace("fsvn.dat", "dump.dat"), fData);
 
             fStore.Dispose();
@@ -72,7 +72,7 @@ namespace Vbyte.DataSource.UnitTest
         public void RefactTest()
         {
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-            fStore.RefactHeadIndex(100);
+            fStore.RefactHeadIndex(255);
             fStore.Dispose();
         }
 

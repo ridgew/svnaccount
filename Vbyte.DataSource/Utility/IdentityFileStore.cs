@@ -68,6 +68,19 @@ namespace Vbyte.DataSource.Utility
         private uint _maxVersion = 0;
 
         /// <summary>
+        /// 数据索引偏移量记录索引位置
+        /// </summary>
+        static readonly long DATA_INDEX_OFFSET = 12;
+        /// <summary>
+        /// 最新版本记录偏移量
+        /// </summary>
+        static readonly int LASTED_VERSION_OFFSET = 16;
+        /// <summary>
+        /// 下次索引记录写入位置偏移量
+        /// </summary>
+        static readonly long NEXT_WRITEINDEX_OFFSET = 28;
+
+        /// <summary>
         /// 写入指定版本的文件数据
         /// </summary>
         /// <param name="version">文件版本</param>
@@ -87,19 +100,20 @@ namespace Vbyte.DataSource.Utility
             InitializeReader();
             _internalWriter = new BinaryWriter(_internalFS);
 
-            int curWoffSet = _hIdxSize;  //数据写入索引位置
+            int datWOffset = _hIdxSize;  //数据写入索引位置
             if (_internalFS.Length == 0)
             {
                 #region 初次创建文件
                 //新建文件
                 _internalFS.SetLength((long)_hIdxSize + fDat.LongLength);
 
+                _internalWriter.Write(Encoding.ASCII.GetBytes("IFS 1.0 "));             //文件版本                      +8
                 _internalWriter.Write(BitConverter.GetBytes(_hIdxSize));                //索引空间长度                  +4
                 _internalWriter.Write(BitConverter.GetBytes((int)0));                   //文件头索引偏移量              +4
 
                 _internalWriter.Write(BitConverter.GetBytes(version));                  //当前版本                      +4
                 _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));          //数据文件长度                  +8
-                _internalWriter.Write(BitConverter.GetBytes((int)45));                  //文件头结束索引(下次写入位置)  +4
+                _internalWriter.Write(BitConverter.GetBytes((int)53));                  //文件头结束索引(下次写入位置)  +4
                 _internalWriter.Write('\n');                                            //                              +1
 
                 _internalWriter.Write(BitConverter.GetBytes(version));                  //数据版本                      +4
@@ -110,41 +124,37 @@ namespace Vbyte.DataSource.Utility
             else
             {
 
-                _internalReader.BaseStream.Position = 0;
-                curWoffSet = _internalReader.ReadInt32();                              //读取索引空间长度              +4
-                Console.WriteLine("索引空间长度为：{0}", curWoffSet);
-                
-                _internalReader.BaseStream.Seek(16, SeekOrigin.Current);
-                int curHIdx = _internalReader.ReadInt32();
+                _internalReader.BaseStream.Position = 8;
+                datWOffset = _internalReader.ReadInt32();                              //读取索引空间长度              +4
+                //Console.WriteLine("索引空间长度为：{0}", datWOffset);
 
-                //版本记录:0:899 1:1025+LONG 3 5 7 9
-                /*
-                 索引空间长度为：2048
-                文件头索引写入位置：125
-                 */
+                _internalReader.BaseStream.Seek(NEXT_WRITEINDEX_OFFSET, SeekOrigin.Begin);
+                int curHWIdx = _internalReader.ReadInt32();
 
-                Console.WriteLine("文件头索引写入位置：{0}", curHIdx);
-                if (curHIdx > curWoffSet - 20)
+                int storeSptLen = 20;
+                //Console.WriteLine("文件头索引写入位置：{0}", curHWIdx);
+                if (curHWIdx > datWOffset - storeSptLen)
                 {
-                    //TODO
-                    Console.WriteLine("索引空间增加为：{0}", curWoffSet + HeadIndexLength);
-                    RefactHeadIndex(curWoffSet + HeadIndexLength);
+                    //Console.WriteLine("索引空间增加为：{0}", datWOffset + HeadIndexLength);
+                    RefactHeadIndex(datWOffset + HeadIndexLength);
                 }
 
-                _internalWriter.Seek(8, SeekOrigin.Begin);
-                _internalWriter.Write(BitConverter.GetBytes(version));                  //当前版本                      +4
-                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));          //数据文件长度                  +8
-                _internalWriter.Write(BitConverter.GetBytes(curHIdx + 20));             //文件头结束索引(下次写入位置)  +4
+                _internalWriter.Seek(LASTED_VERSION_OFFSET, SeekOrigin.Begin);
+                _internalWriter.Write(BitConverter.GetBytes(version));                                      //当前版本                      +4
+                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));                              //数据文件长度                  +8
+                _internalWriter.Write(BitConverter.GetBytes(curHWIdx + storeSptLen));                       //文件头结束索引(下次写入位置)  +4
 
-                _internalWriter.Seek(curHIdx, SeekOrigin.Begin);
-                _internalWriter.Write(BitConverter.GetBytes(version));                  //数据版本                      +4
-                _internalWriter.Write(BitConverter.GetBytes(_internalFS.Length));       //数据开始开始所在索引          +8
-                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));          //数据文件长度                  +8
+                _internalWriter.Seek(curHWIdx, SeekOrigin.Begin);
+                _internalWriter.Write(BitConverter.GetBytes(version));                                      //数据版本                      +4
+                long lwIdx = GetOffSetDat<long>(_internalReader, (long)(curHWIdx - 16));
+                long lwLen = GetOffSetDat<long>(_internalReader, (long)(curHWIdx - 8));
+                _internalWriter.Write(BitConverter.GetBytes(lwIdx + lwLen));                                //数据开始开始所在索引          +8
+                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));                              //数据文件长度                  +8
 
-                curWoffSet = (int)_internalFS.Length;
+                datWOffset = (int)_internalFS.Length;
             }
 
-            _internalWriter.Seek(curWoffSet, SeekOrigin.Begin);
+            _internalWriter.Seek(datWOffset, SeekOrigin.Begin);
             _internalWriter.Write(fDat);
         }
 
@@ -155,25 +165,23 @@ namespace Vbyte.DataSource.Utility
         {
             InitialFileStream();
             long oldPos = _internalFS.Position;
-            //_internalFS
-            //_internalWriter
-            //_internalReader
-
-            string nFileName = FilePath + ".tmp";
-            FileStream nFStream = new FileStream(nFileName, FileMode.Create, FileAccess.Write, FileShare.None);
-            
-
+    
             InitializeReader(); 
-            int oldSize = GetOffSetInt32(_internalReader, 0L);
-            int oldOffSet = GetOffSetInt32(_internalReader, 4L);
-            int iTotalIdx = GetOffSetInt32(_internalReader, 20L);
+            int oldSize = GetOffSetDat<int>(_internalReader, 8L);
+            if (oldSize == idxNewSize) return;
+
+            int oldOffSet = GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET);
+            int iTotalIdx = GetOffSetDat<int>(_internalReader, NEXT_WRITEINDEX_OFFSET);
 
             //执行压缩
             if (iTotalIdx > idxNewSize) idxNewSize = iTotalIdx;
 
-            Console.WriteLine("旧存储空间：{0}", oldSize);
-            Console.WriteLine("已占用空间：{0}", iTotalIdx);
-            Console.WriteLine("修改后空间：{0}", idxNewSize);
+            //Console.WriteLine("旧存储空间：{0}", oldSize);
+            //Console.WriteLine("已占用空间：{0}", iTotalIdx);
+            //Console.WriteLine("修改后空间：{0}", idxNewSize);
+
+            string nFileName = FilePath + ".tmp";
+            FileStream nFStream = new FileStream(nFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
             byte[] buffer = new byte[oldSize];
             long nFileLen = _internalFS.Length + idxNewSize - oldSize;
@@ -193,28 +201,27 @@ namespace Vbyte.DataSource.Utility
             #region 分段读取并写入
             nFStream.Position = idxNewSize;
             //Console.WriteLine("POS：{0}", idxNewSize);
-            //误差：5字节
 
             int currentRead = 0;
 
-            int lTest = 2107; //4096
+            int lTest = 4096;
             buffer = new byte[lTest];
             while ((currentRead = _internalFS.Read(buffer, 0, lTest)) != 0)
             {
-                Console.WriteLine("read:{0}", currentRead);
+                //Console.WriteLine("read:{0}", currentRead);
                 nFStream.Write(buffer, 0, currentRead);
 
-                Console.WriteLine();
-                Console.WriteLine(Utility.FileWrapHelper.GetHexViewString(buffer));
-                Console.WriteLine();
+                //Console.WriteLine();
+                //Console.WriteLine(Utility.FileWrapHelper.GetHexViewString(buffer));
+                //Console.WriteLine();
             }
             nFStream.Flush();
 
             //更新偏移量
-            nFStream.Position = 4;
+            nFStream.Position = DATA_INDEX_OFFSET;
             buffer = new byte[4];
             buffer = BitConverter.GetBytes(nOffSet);
-            Console.WriteLine("修改新偏移量为：{0}", nOffSet);
+            //Console.WriteLine("修改新偏移量为：{0}", nOffSet);
             nFStream.Write(buffer, 0, buffer.Length);
 
             nFStream.Close();
@@ -222,16 +229,27 @@ namespace Vbyte.DataSource.Utility
             #endregion
 
             #region 覆盖旧文件，并还原索引位置信息
-            //_internalFS.Close();
-            //_internalFS.Dispose();
-            //File.Delete(FilePath);
+            _internalFS.Close();
+            _internalFS.Dispose();
+            File.Delete(FilePath);
 
-            //FileInfo nFileInfo = new FileInfo(nFileName);
-            //nFileInfo.MoveTo(FilePath);
+            FileInfo nFileInfo = new FileInfo(nFileName);
+            nFileInfo.MoveTo(FilePath);
 
-            //SwitchFileStream();
-            _internalFS.Position = oldPos;
+            SwitchFileStream();
+            if (oldPos < _internalFS.Length)
+            {
+                _internalFS.Position = oldPos;
+            }
             #endregion
+        }
+
+        /// <summary>
+        /// 获取最新的版本(0)
+        /// </summary>
+        public byte[] GetHeadVersion()
+        {
+            return ReadReversion(0);
         }
 
         /// <summary>
@@ -254,13 +272,13 @@ namespace Vbyte.DataSource.Utility
             InitializeReader();
             //获取最高版本
             uint maxVer = GetMaxVersion(_internalReader); //最后修改版本
-            int offSet = GetOffSetInt32(_internalReader, 4);
+            int offSet = GetOffSetDat<int>(_internalReader, 4);
 
             long fIdx=0, fLen=0;
-            if (ver >= maxVer)
+            if (ver == 0 || ver >= maxVer)
             {
-                //最高版本数据
-                _internalReader.BaseStream.Seek(12, SeekOrigin.Begin);
+                //最高版本数据的数据长度
+                _internalReader.BaseStream.Seek((long)(LASTED_VERSION_OFFSET + 4), SeekOrigin.Begin);
                 fLen = _internalReader.ReadInt64();
 
                 int fLenIdx = _internalReader.ReadInt32();
@@ -287,8 +305,8 @@ namespace Vbyte.DataSource.Utility
 
             _internalFS.Seek(fIdx, SeekOrigin.Begin);
             _internalFS.Read(fDat, 0, (int)fLen);
-            Console.WriteLine("文件索引：{0}", fIdx);
-            Console.WriteLine("文件长度：{0}", fLen);
+            //Console.WriteLine("文件索引：{0}", fIdx);
+            //Console.WriteLine("文件长度：{0}", fLen);
             return fDat;
         }
 
@@ -324,22 +342,40 @@ namespace Vbyte.DataSource.Utility
             if (_maxVersion == 0 && reader != null)
             {
                 long oldPos = reader.BaseStream.Position;
-                reader.BaseStream.Seek(8, SeekOrigin.Begin);
+                reader.BaseStream.Seek((long)LASTED_VERSION_OFFSET, SeekOrigin.Begin);
                 _maxVersion = reader.ReadUInt32(); //最后修改版本 
                 reader.BaseStream.Position = oldPos;
             }
             return _maxVersion;
         }
 
-        private int GetOffSetInt32(BinaryReader reader, long offset)
+        /// <summary>
+        /// 暂时只支持int,long,uint
+        /// </summary>
+        private T GetOffSetDat<T>(BinaryReader reader, long offset)
+            where T : IConvertible
         {
+            T objRet = default(T);
             long oldPos = reader.BaseStream.Position;
-
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            int offSet = reader.ReadInt32(); //偏移量
-
+            object objRead = 0;
+            switch (objRet.GetTypeCode())
+            { 
+                case TypeCode.Int32 :
+                    objRead = reader.ReadInt32();
+                    break;
+                case TypeCode.Int64 :
+                    objRead = reader.ReadInt64();
+                    break;
+                case TypeCode.UInt32 :
+                    objRead = reader.ReadUInt32();
+                    break;
+                default :
+                    break;
+            }
+            objRet = (T)Convert.ChangeType(objRead, typeof(T)); //偏移量
             reader.BaseStream.Position = oldPos;
-            return offSet;
+            return objRet;
         }
 
         /// <summary>
@@ -372,7 +408,7 @@ namespace Vbyte.DataSource.Utility
             List<StoreSnippet> vers = new List<StoreSnippet>();
 
             uint tVer = GetMaxVersion(_internalReader); //最后修改版本
-            _internalReader.BaseStream.Seek(25, SeekOrigin.Begin); //第一个版本索引位置
+            _internalReader.BaseStream.Seek(NEXT_WRITEINDEX_OFFSET + 5, SeekOrigin.Begin); //第一个版本索引位置
             uint cVer = _internalReader.ReadUInt32();
             StoreSnippet snippet;
             bool midBreaked = false;
