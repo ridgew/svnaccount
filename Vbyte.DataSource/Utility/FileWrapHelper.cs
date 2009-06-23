@@ -87,6 +87,7 @@ namespace Vbyte.DataSource.Utility
 
                 if (i > 0 && (i + 1) % 16 == 0)
                 {
+                    sb.Append(" "); 
                     foreach (byte chrB in ascByte)
                     {
                         if (chrB >= 0x20 && chrB <= 0x7E) //[32,126]
@@ -110,6 +111,8 @@ namespace Vbyte.DataSource.Utility
             if (lastRead < 15)
             {
                 sb.Append(new string(' ', (15 - lastRead) * 3));
+                if (lastRead < 8) sb.Append(" ");
+                sb.Append(" ");
                 for (int m = 0; m <= lastRead; m++)
                 {
                     byte charL = ascByte[m];
