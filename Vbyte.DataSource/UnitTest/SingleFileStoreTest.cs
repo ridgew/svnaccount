@@ -62,6 +62,10 @@ namespace Vbyte.DataSource.UnitTest
              */
             IdentityFileStore fStore = new IdentityFileStore(localFile);
 
+            Console.WriteLine("Ver：{0}", fStore.GetFileVersion());
+            Console.WriteLine("IDX Size：{0}", fStore.GetIndexSize());
+            Console.WriteLine("Dat Offset：{0}", fStore.GetDataOffset());
+
             byte[] fData = fStore.ReadReversion(106);
             File.WriteAllBytes(localFile.Replace("fsvn.dat", "dump.dat"), fData);
 
@@ -72,7 +76,7 @@ namespace Vbyte.DataSource.UnitTest
         public void RefactTest()
         {
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-            fStore.RefactHeadIndex(255);
+            fStore.RefactHeadIndex(2048 + 1793);
             fStore.Dispose();
         }
 
@@ -84,6 +88,7 @@ namespace Vbyte.DataSource.UnitTest
             foreach (StoreSnippet spt in vers)
             {
                 Console.WriteLine("版本：{0}", spt.Version);
+                Console.WriteLine("时间：{0}", spt.CreateTimeUTC.ToLocalTime());
                 Console.WriteLine("索引：{0}", spt.StoreIndex);
                 Console.WriteLine("长度：{0}", spt.FileLength);
                 Console.WriteLine();

@@ -25,6 +25,11 @@ namespace Vbyte.DataSource.Utility
         /// 该段文件长度
         /// </summary>
         public long FileLength { get; set; }
+
+        /// <summary>
+        /// 创建时间的UTC格式
+        /// </summary>
+        public DateTime CreateTimeUTC { get; set; }
     }
     
     /// <summary>
@@ -89,17 +94,8 @@ namespace Vbyte.DataSource.Utility
         /// <param name="fDat">文件二进制字节数据</param>
         public void WriteReversion(uint version, byte[] fDat)
         {
-            if (_StoreReadMode)
-            {
-                _StoreReadMode = false;
-                SwitchFileStream();
-            }
-            else
-            {
-                InitialFileStream();
-            }
+            SwitchMode(false);
 
-            InitializeReader();
             _internalWriter = new BinaryWriter(_internalFS);
 
             int datWOffset = _hIdxSize;  //数据写入索引位置
@@ -109,18 +105,19 @@ namespace Vbyte.DataSource.Utility
                 //新建文件
                 _internalFS.SetLength((long)_hIdxSize + fDat.LongLength);
 
-                _internalWriter.Write(Encoding.ASCII.GetBytes("IFS 1.0 "));             //文件版本                      +8
-                _internalWriter.Write(BitConverter.GetBytes(_hIdxSize));                //索引空间长度                  +4
-                _internalWriter.Write(BitConverter.GetBytes((int)0));                   //文件头索引偏移量              +4
+                _internalWriter.Write(Encoding.ASCII.GetBytes("IFS 1.0 "));                             //文件版本                      +8
+                _internalWriter.Write(BitConverter.GetBytes(_hIdxSize));                                //索引空间长度                  +4
+                _internalWriter.Write(BitConverter.GetBytes((int)0));                                   //文件头索引偏移量              +4
 
-                _internalWriter.Write(BitConverter.GetBytes(version));                  //当前版本                      +4
-                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));          //数据文件长度                  +8
-                _internalWriter.Write(BitConverter.GetBytes((int)53));                  //文件头结束索引(下次写入位置)  +4
-                _internalWriter.Write('\n');                                            //                              +1
+                _internalWriter.Write(BitConverter.GetBytes(version));                                  //当前版本                      +4
+                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));                          //数据文件长度                  +8
+                _internalWriter.Write(BitConverter.GetBytes((int)61));                                  //文件头结束索引(下次写入位置)  +4
+                _internalWriter.Write('\n');                                                            //                              +1
 
-                _internalWriter.Write(BitConverter.GetBytes(version));                  //数据版本                      +4
-                _internalWriter.Write(BitConverter.GetBytes((long)_hIdxSize));          //数据开始开始所在索引          +8
-                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));          //数据文件长度                  +8
+                _internalWriter.Write(BitConverter.GetBytes(version));                                  //数据版本                      +4
+                _internalWriter.Write(BitConverter.GetBytes(DateTime.Now.ToUniversalTime().Ticks));     //创建时间                      +8
+                _internalWriter.Write(BitConverter.GetBytes((long)_hIdxSize));                          //数据开始开始所在索引          +8
+                _internalWriter.Write(BitConverter.GetBytes(fDat.LongLength));                          //数据文件长度                  +8
                 #endregion
             }
             else
@@ -133,7 +130,7 @@ namespace Vbyte.DataSource.Utility
                 _internalReader.BaseStream.Seek(NEXT_WRITEINDEX_OFFSET, SeekOrigin.Begin);
                 int curHWIdx = _internalReader.ReadInt32();
 
-                int storeSptLen = 20;
+                int storeSptLen = 28; //4+8+8+8
                 //Console.WriteLine("文件头索引写入位置：{0}", curHWIdx);
                 if (curHWIdx > datWOffset - storeSptLen)
                 {
@@ -148,6 +145,7 @@ namespace Vbyte.DataSource.Utility
 
                 _internalWriter.Seek(curHWIdx, SeekOrigin.Begin);
                 _internalWriter.Write(BitConverter.GetBytes(version));                                      //数据版本                      +4
+                _internalWriter.Write(BitConverter.GetBytes(DateTime.Now.ToUniversalTime().Ticks));         //创建时间                      +8
                 long lwIdx = GetOffSetDat<long>(_internalReader, (long)(curHWIdx - 16));
                 long lwLen = GetOffSetDat<long>(_internalReader, (long)(curHWIdx - 8));
                 _internalWriter.Write(BitConverter.GetBytes(lwIdx + lwLen));                                //数据开始开始所在索引          +8
@@ -255,26 +253,51 @@ namespace Vbyte.DataSource.Utility
         }
 
         /// <summary>
+        /// 切换数据交换模式
+        /// </summary>
+        /// <param name="isReadMode">是否是读取模式</param>
+        private void SwitchMode(bool isReadMode)
+        {
+            if (isReadMode)
+            {
+                if (!_StoreReadMode)
+                {
+                    _StoreReadMode = true;
+                    SwitchFileStream();
+                }
+                else
+                {
+                    InitialFileStream();
+                }
+            }
+            else
+            {
+                if (_StoreReadMode)
+                {
+                    _StoreReadMode = false;
+                    SwitchFileStream();
+                }
+                else
+                {
+                    InitialFileStream();
+                }
+            }
+            InitializeReader();
+        }
+
+        /// <summary>
         /// 获取指定版本的二进制字节数据
         /// </summary>
         /// <param name="version">文件版本</param>
         /// <returns>该文件二进制字节数据，如果指定版本不存在则长度为0的字节数组。</returns>
         public byte[] ReadReversion(uint ver)
         {
-            if (!_StoreReadMode)
-            {
-                _StoreReadMode = true;
-                SwitchFileStream();
-            }
-            else
-            {
-                InitialFileStream();
-            }
+            SwitchMode(true);
 
-            InitializeReader();
             //获取最高版本
             uint maxVer = GetMaxVersion(_internalReader); //最后修改版本
             int offSet = GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET);
+            //Console.WriteLine("OffSET：{0}", offSet);
 
             long fIdx=0, fLen=0;
             if (ver == 0 || ver >= maxVer)
@@ -381,6 +404,36 @@ namespace Vbyte.DataSource.Utility
         }
 
         /// <summary>
+        /// 获取实现的文件版本
+        /// </summary>
+        public string GetFileVersion()
+        {
+            SwitchMode(true);
+            long oldPos = _internalReader.BaseStream.Position;
+            byte[] fvBytes = _internalReader.ReadBytes(8);
+            _internalReader.BaseStream.Position = oldPos;
+            return Encoding.ASCII.GetString(fvBytes);
+        }
+
+        /// <summary>
+        /// 获取索引数据大小
+        /// </summary>
+        public int GetIndexSize()
+        {
+            SwitchMode(true);
+            return GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET - 4);
+        }
+
+        /// <summary>
+        /// 获取数据保持的偏移量
+        /// </summary>
+        public int GetDataOffset()
+        {
+            SwitchMode(true);
+            return GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET);
+        }
+
+        /// <summary>
         /// 获取该文件保存的所有版本信息
         /// </summary>
         /// <returns></returns>
@@ -419,6 +472,7 @@ namespace Vbyte.DataSource.Utility
             {
                 snippet = new StoreSnippet();
                 snippet.Version = cVer;
+                snippet.CreateTimeUTC = DateTime.FromBinary(_internalReader.ReadInt64());
                 snippet.StoreIndex = _internalReader.ReadInt64();
                 snippet.FileLength = _internalReader.ReadInt64();
                 vers.Add(snippet);
@@ -436,6 +490,7 @@ namespace Vbyte.DataSource.Utility
             {
                 snippet = new StoreSnippet();
                 snippet.Version = cVer;
+                snippet.CreateTimeUTC = DateTime.FromBinary(_internalReader.ReadInt64());
                 snippet.StoreIndex = _internalReader.ReadInt64();
                 snippet.FileLength = _internalReader.ReadInt64();
                 vers.Add(snippet);
