@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AbstractData.cs" />
     <Compile Include="Cache\Singleton.cs" />
+    <Compile Include="Configuration\ImplementVersionAttribute.cs" />
     <Compile Include="Configuration\XmlSerializeSectionHandler.cs" />
     <Compile Include="FileSystemStorage.cs" />
     <Compile Include="IDataStorage.cs" />

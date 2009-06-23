@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Text;
+using Vbyte.DataSource.Configuration;
 
 namespace Vbyte.DataSource.Utility
 {
@@ -29,6 +30,7 @@ namespace Vbyte.DataSource.Utility
     /// <summary>
     /// 唯一标识的版本数据存储实现
     /// </summary>
+    [ImplementVersion("IFS 1.0", Description = "同一标识数据的多版本控制单一文件存储实现")]
     public sealed class IdentityFileStore : IDisposable
     {
         /// <summary>
@@ -159,7 +161,7 @@ namespace Vbyte.DataSource.Utility
         }
 
         /// <summary>
-        /// 重新调整索引文件头空间（增加或压缩）（TODO）
+        /// 重新调整索引文件头空间（增加或压缩）
         /// </summary>
         internal void RefactHeadIndex(int idxNewSize)
         {
@@ -272,7 +274,7 @@ namespace Vbyte.DataSource.Utility
             InitializeReader();
             //获取最高版本
             uint maxVer = GetMaxVersion(_internalReader); //最后修改版本
-            int offSet = GetOffSetDat<int>(_internalReader, 4);
+            int offSet = GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET);
 
             long fIdx=0, fLen=0;
             if (ver == 0 || ver >= maxVer)
