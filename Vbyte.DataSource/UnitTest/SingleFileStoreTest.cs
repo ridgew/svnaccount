@@ -19,7 +19,7 @@ namespace Vbyte.DataSource.UnitTest
             Dictionary<string, List<string>> dbDict = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
             dbDict.Add("/", new List<string>{ "test", "test.html", "js", "css", "index.html" });
 
-            uint version = 45;  //max:4294967295
+            uint version = 108;  //max:4294967295
             byte[] fileBytes = Utility.FileWrapHelper.GetBytes(dbDict);
 
             IdentityFileStore fStore = new IdentityFileStore(localFile);
@@ -65,6 +65,8 @@ namespace Vbyte.DataSource.UnitTest
             Console.WriteLine("Ver：{0}", fStore.GetFileVersion());
             Console.WriteLine("IDX Size：{0}", fStore.GetIndexSize());
             Console.WriteLine("Dat Offset：{0}", fStore.GetDataOffset());
+            Console.WriteLine("HEAD：{0}", fStore.GetHeadVersion());
+            Console.WriteLine("FOOT：{0}", fStore.GetFootVersion());
 
             byte[] fData = fStore.ReadReversion(106);
             File.WriteAllBytes(localFile.Replace("fsvn.dat", "dump.dat"), fData);
@@ -76,7 +78,7 @@ namespace Vbyte.DataSource.UnitTest
         public void RefactTest()
         {
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-            fStore.RefactHeadIndex(2048 + 1793);
+            fStore.RefactHeadIndex(0);
             fStore.Dispose();
         }
 
