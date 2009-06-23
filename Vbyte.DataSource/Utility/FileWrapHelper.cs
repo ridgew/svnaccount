@@ -64,6 +64,10 @@ namespace Vbyte.DataSource.Utility
         {
             //tbxBinView.Text = "总长度：" + binDat.Length.ToString() + "字节"
             //    + Environment.NewLine + Environment.NewLine;
+
+            byte[] ascByte = new byte[16];
+            int lastRead = 0;
+
             StringBuilder sb = new StringBuilder();
             for (int i = 0, j = binDat.Length; i < j; i++)
             {
@@ -71,7 +75,10 @@ namespace Vbyte.DataSource.Utility
                 {
                     sb.Append("00000000  ");
                 }
+
                 sb.Append(binDat[i].ToString("X2") + " ");
+                lastRead = i % 16;
+                ascByte[lastRead] = binDat[i];
 
                 if (i > 0 && (i + 1) % 8 == 0 && (i + 1) % 16 != 0)
                 {
@@ -80,8 +87,40 @@ namespace Vbyte.DataSource.Utility
 
                 if (i > 0 && (i + 1) % 16 == 0)
                 {
-                    sb.Append(Environment.NewLine);
-                    sb.Append((i + 1).ToString("X2").PadLeft(8, '0') + "  ");
+                    foreach (byte chrB in ascByte)
+                    {
+                        if (chrB >= 0x20 && chrB <= 0x7E) //[32,126]
+                        {
+                            sb.Append((char)chrB);
+                        }
+                        else
+                        {
+                            sb.Append('.');
+                        }
+                    }
+
+                    if (i+1 != j)
+                    {
+                        sb.Append(Environment.NewLine);
+                        sb.Append((i + 1).ToString("X2").PadLeft(8, '0') + "  ");
+                    }
+                }
+            }
+
+            if (lastRead < 15)
+            {
+                sb.Append(new string(' ', (15 - lastRead) * 3));
+                for (int m = 0; m <= lastRead; m++)
+                {
+                    byte charL = ascByte[m];
+                    if (charL >= 0x20 && charL <= 0x7E) //[32,126]
+                    {
+                        sb.Append((char)charL);
+                    }
+                    else
+                    {
+                        sb.Append('.');
+                    }
                 }
             }
             return sb.ToString();
