@@ -7,7 +7,23 @@ using System.Text;
 
 namespace Vbyte.DataSource.Utility
 {
-    public class SymmetricCryptography<T> where T : SymmetricAlgorithm, new()
+    /// <summary>
+    /// 通用对称加解密算法辅助函数
+    /// <para>Code: Tony Selke</para>
+    /// <para>http://www.codeproject.com/KB/security/SymmetricAlgorithmHelper.aspx</para>
+    /// </summary>
+    /// <typeparam name="T">对称加解密算法类型</typeparam>
+    /// <example>
+    /// <![CDATA[
+    ///     T 中现有的.NET实现版本
+    ///     ----------------------
+    ///     * DESCryptoServiceProvider
+    ///     * RC2CryptoServiceProvider
+    ///     * RijndaelManaged
+    ///     * TripleDESCryptoServiceProvider
+    /// ]]>
+    /// </example>
+    public sealed class SymmetricCryptography<T> where T : SymmetricAlgorithm, new()
     {
         #region Fields
 
@@ -294,4 +310,169 @@ namespace Vbyte.DataSource.Utility
 
         #endregion Private Methods
     }
+
+    #region Hash Class...
+
+    /// <summary>CHashProtector is a password protection one way encryption algorithm</summary>
+    /// <programmer>Chidi C. Ezeukwu</programmer>
+    /// <written>May 16, 2004</written>
+    /// <Updated>Aug 07, 2004</Updated>
+    public class HashProvider
+    {
+        #region Private member variables...
+
+        private string mSalt = string.Empty;
+        private HashAlgorithm mCryptoService;
+        private Encoding hashEncoding = Encoding.UTF8;
+
+        #endregion
+
+        #region Public interfaces...
+
+        /// <summary>
+        /// 内置的HASH算法
+        /// </summary>
+        public enum ServiceProviderEnum : int
+        {
+            // Supported algorithms
+            /// <summary>
+            /// 
+            /// </summary>
+            SHA1,
+            /// <summary>
+            /// 
+            /// </summary>
+            SHA256,
+            /// <summary>
+            /// 
+            /// </summary>
+            SHA384,
+            /// <summary>
+            /// 
+            /// </summary>
+            SHA512,
+            /// <summary>
+            /// MD5 哈希值
+            /// </summary>
+            MD5
+        }
+
+        public HashProvider()
+        {
+            // Default Hash algorithm
+            mCryptoService = new SHA1Managed();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HashProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        public HashProvider(ServiceProviderEnum serviceProvider)
+        {
+            // Select hash algorithm
+            switch (serviceProvider)
+            {
+                case ServiceProviderEnum.MD5:
+                    mCryptoService = new MD5CryptoServiceProvider();
+                    break;
+                case ServiceProviderEnum.SHA1:
+                    mCryptoService = new SHA1Managed();
+                    break;
+                case ServiceProviderEnum.SHA256:
+                    mCryptoService = new SHA256Managed();
+                    break;
+                case ServiceProviderEnum.SHA384:
+                    mCryptoService = new SHA384Managed();
+                    break;
+                case ServiceProviderEnum.SHA512:
+                    mCryptoService = new SHA512Managed();
+                    break;
+            }
+
+            mCryptoService.Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HashProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="datEncode">The data encode.</param>
+        public HashProvider(ServiceProviderEnum serviceProvider, Encoding datEncode)
+            : this(serviceProvider)
+        {
+            hashEncoding = datEncode;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HashProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProviderName">Name of the service provider.</param>
+        public HashProvider(string serviceProviderName)
+        {
+            try
+            {
+                // Set Hash algorithm
+                mCryptoService = (HashAlgorithm)CryptoConfig.CreateFromName(serviceProviderName.ToUpper());
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 获取哈希码(16进制字符串)
+        /// </summary>
+        /// <param name="plainText">The plain text.</param>
+        /// <returns></returns>
+        public virtual string ComputeHash(string plainText)
+        {
+            return ComputeHash(hashEncoding.GetBytes(plainText + mSalt));
+        }
+
+        /// <summary>
+        /// 获取哈希码(16进制字符串)
+        /// </summary>
+        /// <param name="hBytes">需要计算哈希码的字节数据</param>
+        /// <returns></returns>
+        public virtual string ComputeHash(byte[] hBytes)
+        {
+            byte[] cryptoByte = mCryptoService.ComputeHash(hBytes);
+            return ByteArrayToHexStr(cryptoByte, true);
+        }
+
+        /// <summary>
+        /// 二进制流的16进制字符串表达形式
+        /// </summary>
+        /// <param name="bytHash">二进制流</param>
+        /// <param name="IsLowerCase">小写16进制字母</param>
+        public static string ByteArrayToHexStr(byte[] bytHash, bool IsLowerCase)
+        {
+            string sTemp = "";
+            for (int i = 0; i < bytHash.Length; i++)
+            {
+                sTemp += bytHash[i].ToString("X2");
+            }
+            return (IsLowerCase) ? sTemp.ToLower() : sTemp.ToUpper();
+        }
+
+        /// <summary>
+        /// Gets or sets the salt.
+        /// </summary>
+        /// <value>The salt.</value>
+        public string Salt
+        {
+            // Salt value
+            get
+            {
+                return mSalt;
+            }
+            set
+            {
+                mSalt = value;
+            }
+        }
+        #endregion
+    }
+    #endregion
 }
