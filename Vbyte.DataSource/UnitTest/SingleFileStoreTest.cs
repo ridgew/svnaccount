@@ -19,11 +19,13 @@ namespace Vbyte.DataSource.UnitTest
             Dictionary<string, List<string>> dbDict = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
             dbDict.Add("/", new List<string>{ "test", "test.html", "js", "css", "index.html" });
 
-            uint version = 108;  //max:4294967295
-            byte[] fileBytes = Utility.FileWrapHelper.GetBytes(dbDict);
-
             IdentityFileStore fStore = new IdentityFileStore(localFile);
+            
+            uint version = fStore.GetHeadVersion() + 1;  //max:4294967295
+
+            byte[] fileBytes = Utility.FileWrapHelper.GetBytes(dbDict);
             fStore.WriteReversion(version, fileBytes);
+
             fStore.Dispose();
         }
 
@@ -61,15 +63,22 @@ namespace Vbyte.DataSource.UnitTest
                 长度：2107
              */
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-
-            Console.WriteLine("Ver：{0}", fStore.GetFileVersion());
-            Console.WriteLine("IDX Size：{0}", fStore.GetIndexSize());
-            Console.WriteLine("Dat Offset：{0}", fStore.GetDataOffset());
-            Console.WriteLine("HEAD：{0}", fStore.GetHeadVersion());
-            Console.WriteLine("FOOT：{0}", fStore.GetFootVersion());
-
             byte[] fData = fStore.ReadReversion(106);
             File.WriteAllBytes(localFile.Replace("fsvn.dat", "dump.dat"), fData);
+            fStore.Dispose();
+        }
+
+        [Test]
+        public void ReadSummary()
+        {
+            IdentityFileStore fStore = new IdentityFileStore(localFile);
+
+            Console.WriteLine("Ver：{0}", fStore.GetStoreVersion());
+            Console.WriteLine("IDX Size：{0}", fStore.GetIndexSize());
+            Console.WriteLine("Dat Offset：{0}", fStore.GetDataReadOffset());
+            Console.WriteLine("Index Write Offset：{0}", fStore.GetNextIndexWriteOffset());
+            Console.WriteLine("HEAD：{0}", fStore.GetHeadVersion());
+            Console.WriteLine("FOOT：{0}", fStore.GetFootVersion());
 
             fStore.Dispose();
         }
@@ -78,7 +87,7 @@ namespace Vbyte.DataSource.UnitTest
         public void RefactTest()
         {
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-            fStore.RefactHeadIndex(0);
+            Console.WriteLine("重置索引大小：{0}", fStore.RefactHeadIndex(0));
             fStore.Dispose();
         }
 
@@ -86,8 +95,8 @@ namespace Vbyte.DataSource.UnitTest
         public void GetAllVersion()
         {
             IdentityFileStore fStore = new IdentityFileStore(localFile);
-            StoreSnippet[] vers = fStore.GetAllVersions();
-            foreach (StoreSnippet spt in vers)
+            VersionSnippet[] vers = fStore.GetAllVersions();
+            foreach (VersionSnippet spt in vers)
             {
                 Console.WriteLine("版本：{0}", spt.Version);
                 Console.WriteLine("时间：{0}", spt.CreateTimeUTC.ToLocalTime());
