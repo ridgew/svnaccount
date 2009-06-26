@@ -158,11 +158,14 @@ namespace Vbyte.DataSource.Utility
 
             #region 更新偏移量
             if (IndexSizeChange != null) IndexSizeChange(idxNewSize, outStream);
-            outStream.Position = IdxOffset;
-            buffer = new byte[4];
-            buffer = BitConverter.GetBytes(nOffSet);
-            //Console.WriteLine("修改新偏移量为：{0}", nOffSet);
-            outStream.Write(buffer, 0, buffer.Length);
+            if (IdxOffset > 0)
+            {
+                outStream.Position = IdxOffset;
+                buffer = new byte[4];
+                buffer = BitConverter.GetBytes(nOffSet);
+                //Console.WriteLine("修改新偏移量为：{0}", nOffSet);
+                outStream.Write(buffer, 0, buffer.Length);
+            }
             #endregion
 
             #region 分段读取并写入

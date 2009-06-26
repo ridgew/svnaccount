@@ -19,7 +19,7 @@ namespace Vbyte.DataSource.Utility
         public IdentityFileStore(string filepath)
         {
             FilePath = filepath;
-            CreatNewFile(filepath);
+            CreatNewFile(filepath, HeadIndexLength);
 
             InitialFileStream();
             InitializeReader();
@@ -256,14 +256,14 @@ namespace Vbyte.DataSource.Utility
             }
         }
 
-        internal static bool CreatNewFile(string filePath)
+        internal static bool CreatNewFile(string filePath, long? length)
         {
             if (!File.Exists(filePath))
             {
                 FileInfo newFile = new FileInfo(filePath);
                 using (FileStream nFS = newFile.Create())
                 {
-                    nFS.SetLength(0);
+                    nFS.SetLength(length.HasValue ? length.Value : 0);
                     nFS.Close();
                 }
                 return true;
