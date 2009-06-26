@@ -210,9 +210,11 @@ namespace Vbyte.DataSource.Utility
 
         public void WriteData(long offset, byte[] dat)
         {
+            long oldPos = storeStream.Position;
             storeStream.Seek(offset, SeekOrigin.Begin);
             storeStream.Write(dat, 0, dat.Length);
             storeStream.Flush();
+            storeStream.Position = oldPos;
         }
 
         #region IDisposable 成员

@@ -91,6 +91,7 @@ namespace Vbyte.DataSource.UnitTest
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
             Console.WriteLine("Idx Size: {0}", fs.GetIndexSize());
             Console.WriteLine("Real Size: {0}", fs.GetIndexRealSize());
+            Console.WriteLine("Dirty Size: {0}", fs.GetDirtyBlockRealSize());
             Console.WriteLine("Version: {0}", fs.GetStoreVersion());
             Console.WriteLine("Keys Count: {0}", fs.GetKeyCount());
             Console.WriteLine("Keys: {0}", string.Join("\n", fs.GetAllKeys()));
