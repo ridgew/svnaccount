@@ -143,14 +143,14 @@ namespace Vbyte.DataSource.Utility
 
             byte[] idxBytes = FileWrapHelper.GetBytes(new SortedList<string, KeyValueState>(StringComparer.Ordinal));
             //Console.WriteLine(idxBytes.Length);
-            WriteData(HEAD_SUMMARY_BYTES, idxBytes);
+            KeepPositionWrite(HEAD_SUMMARY_BYTES, idxBytes);
             _internalWriter.Write(BitConverter.GetBytes(idxBytes.Length));                          //索引有效数据长度              +4
 
             _internalWriter.Write(BitConverter.GetBytes(MAX_DIRTYBLOCK_SIZE));                      //DirtyBlock空间长度            +4
 
             byte[] dbBytes = FileWrapHelper.GetBytes(new SortedList<long, DirtyBlock>());
             //Console.WriteLine(dbBytes.Length);
-            WriteData(HEAD_SUMMARY_BYTES + HeadIndexLength, dbBytes);
+            KeepPositionWrite(HEAD_SUMMARY_BYTES + HeadIndexLength, dbBytes);
             _internalWriter.Write(BitConverter.GetBytes(dbBytes.Length));                           //DirtyBlock有效数据长度        +4
             _internalWriter.Write(BitConverter.GetBytes((int)0));                                   //所有键值总数                  +4
             _internalWriter.Write('\n');                                                            //                              +1
@@ -225,7 +225,7 @@ namespace Vbyte.DataSource.Utility
 
         private void SetKeyCount(int count)
         {
-            WriteData(HEAD_SUMMARY_BYTES - 5, BitConverter.GetBytes(count));
+            KeepPositionWrite(HEAD_SUMMARY_BYTES - 5, BitConverter.GetBytes(count));
         }
 
         public string[] GetPredicateKeys(Predicate<string> m, bool isMatch)
@@ -374,7 +374,7 @@ namespace Vbyte.DataSource.Utility
                 IncrementIndexSize();
                 UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 12);
             }
-            WriteData(nDataIndex, kDat);
+            KeepPositionWrite(nDataIndex, kDat);
             return true;
         }
 
@@ -490,8 +490,8 @@ namespace Vbyte.DataSource.Utility
             if (bytes.Length > cmpLength) result = true;
             if (!result)
             {
-                WriteData(offset, bytes);
-                WriteData(lenUpdateOffset, BitConverter.GetBytes(bytes.Length));
+                KeepPositionWrite(offset, bytes);
+                KeepPositionWrite(lenUpdateOffset, BitConverter.GetBytes(bytes.Length));
             }
             //是否需要增加索引空间或清理未使用的空间
             return result;

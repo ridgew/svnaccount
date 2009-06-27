@@ -33,8 +33,8 @@ namespace Vbyte.DataSource.Utility
         /// </summary>
         public StreamStoreBase()
             : base()
-        { 
-        
+        {
+
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Vbyte.DataSource.Utility
             //Console.WriteLine("修改后空间：{0}", idxNewSize);
 
             //更新索引偏移量条件
-            if (nFileLen <= 0 || nOffSet == oldOffSet)  return false;
+            if (nFileLen <= 0 || nOffSet == oldOffSet) return false;
 
             #region 复制旧索引及开始数据
             byte[] buffer = new byte[oldIdxSize];
@@ -208,13 +208,26 @@ namespace Vbyte.DataSource.Utility
             return tDat;
         }
 
-        public void WriteData(long offset, byte[] dat)
+        public byte[] KeepPositionRead(long offset, int count)
         {
             long oldPos = storeStream.Position;
+            byte[] tDat = ReadData(offset, count);
+            storeStream.Position = oldPos;
+            return tDat;
+        }
+
+        public void KeepPositionWrite(long offset, byte[] dat)
+        {
+            long oldPos = storeStream.Position;
+            WriteData(offset, dat);
+            storeStream.Position = oldPos;
+        }
+
+        public void WriteData(long offset, byte[] dat)
+        {
             storeStream.Seek(offset, SeekOrigin.Begin);
             storeStream.Write(dat, 0, dat.Length);
             storeStream.Flush();
-            storeStream.Position = oldPos;
         }
 
         #region IDisposable 成员
