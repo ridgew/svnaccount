@@ -38,6 +38,8 @@ namespace Vbyte.DataSource.Utility
             _internalReader = null;
             InitializeReader();
 
+            _currentDatOffset = GetOffSetDat<int>(_internalReader, 12);
+
             _internalWriter = null;
             InitializeWriter();
         }
@@ -99,12 +101,22 @@ namespace Vbyte.DataSource.Utility
         }
 
         /// <summary>
+        /// 获取非数据区的文件头数据大小
+        /// </summary>
+        public override int GetFileHeadSize()
+        {
+            return HEAD_SUMMARY_BYTES + GetIndexSize() + MAX_DIRTYBLOCK_SIZE;
+        }
+
+        private long _currentDatOffset = 0;
+
+        /// <summary>
         /// 获取数据索引偏移量值保存的偏移位置
         /// </summary>
         /// <returns></returns>
         public override long GetDataIndexOffset()
         {
-            return -1;
+            return DATA_INDEX_OFFSET;
         }
 
         /// <summary>
@@ -113,7 +125,7 @@ namespace Vbyte.DataSource.Utility
         /// <returns></returns>
         public override long GetDataReadOffset()
         {
-            return 0;
+            return GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET);
         }
 
         /// <summary>
@@ -127,6 +139,11 @@ namespace Vbyte.DataSource.Utility
         #endregion
 
         /// <summary>
+        /// 数据索引偏移量记录索引位置
+        /// </summary>
+        static readonly long DATA_INDEX_OFFSET = 12;
+        
+        /// <summary>
         /// 索引空间增加步长
         /// </summary>
         static readonly int INDEX_INCREMENT_STEP = 204800;  //200K
@@ -137,31 +154,33 @@ namespace Vbyte.DataSource.Utility
         /// <summary>
         /// 文件头描述所占字节数
         /// </summary>
-        static readonly int HEAD_SUMMARY_BYTES = 29;
+        static readonly int HEAD_SUMMARY_BYTES = 41;
 
         private void BuildEmptyFile()
         {
             _internalWriter.Write(Encoding.ASCII.GetBytes("KVS 1.0 "));                             //文件版本                      +8
             _internalWriter.Write(BitConverter.GetBytes(HeadIndexLength));                          //索引空间长度                  +4
 
+            _internalWriter.Write(BitConverter.GetBytes((int)0));                                   //数据索引偏移量                +4
+            _internalWriter.Write(BitConverter.GetBytes((long)0));                                  //下次写入数据索引              +8
+
             byte[] idxBytes = FileWrapHelper.GetBytes(new SortedList<string, KeyValueState>(StringComparer.Ordinal));
-            //Console.WriteLine(idxBytes.Length);
             KeepPositionWrite(HEAD_SUMMARY_BYTES, idxBytes);
             _internalWriter.Write(BitConverter.GetBytes(idxBytes.Length));                          //索引有效数据长度              +4
 
             _internalWriter.Write(BitConverter.GetBytes(MAX_DIRTYBLOCK_SIZE));                      //DirtyBlock空间长度            +4
 
             byte[] dbBytes = FileWrapHelper.GetBytes(new SortedList<long, DirtyBlock>());
-            //Console.WriteLine(dbBytes.Length);
             KeepPositionWrite(HEAD_SUMMARY_BYTES + HeadIndexLength, dbBytes);
             _internalWriter.Write(BitConverter.GetBytes(dbBytes.Length));                           //DirtyBlock有效数据长度        +4
+
             _internalWriter.Write(BitConverter.GetBytes((int)0));                                   //所有键值总数                  +4
             _internalWriter.Write('\n');                                                            //                              +1
         }
 
         public int GetIndexRealSize()
         {
-            return GetOffSetDat<int>(_internalReader, 8 + 4);
+            return GetOffSetDat<int>(_internalReader, 24);
         }
 
         public int GetDirtyBlockRealSize()
@@ -195,7 +214,7 @@ namespace Vbyte.DataSource.Utility
         {
             if (DirtyObject == null)
             {
-                int dCount = GetOffSetDat<int>(_internalReader, HEAD_SUMMARY_BYTES - 9);
+                int dCount = GetDirtyBlockRealSize();
                 if (dCount > 0)
                 {
                     byte[] idxBytes = ReadData((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dCount);
@@ -265,19 +284,14 @@ namespace Vbyte.DataSource.Utility
         {
             fIndex = 0;
             fLen = 0;
-            int idxCount = GetIndexRealSize();
             bool isExist = false;
-            if (idxCount > 0)
+            SortedList<string, KeyValueState> idxObj = GetIndexObject(null);
+            isExist = (idxObj != null && idxObj.ContainsKey(key));
+            if (isExist)
             {
-                //Console.WriteLine("ExistsDataKey => IDX Len: {0}", idxCount);
-                SortedList<string, KeyValueState> idxObj = GetIndexObject(idxCount);
-                isExist = (idxObj != null && idxObj.ContainsKey(key));
-                if (isExist)
-                {
-                    KeyValueState kState = idxObj[key];
-                    fIndex = kState.DataIndex;
-                    fLen = (int)kState.Length;
-                }
+                KeyValueState kState = idxObj[key];
+                fIndex = kState.DataIndex;
+                fLen = (int)kState.Length;
             }
             return isExist;
         }
@@ -300,7 +314,8 @@ namespace Vbyte.DataSource.Utility
             }
             else
             {
-                return ReadData(iIdx, iLen);
+                Console.WriteLine("Debug: offset {2} , {0} + {1}", iIdx, iLen, _currentDatOffset);
+                return ReadData(iIdx + _currentDatOffset, iLen);
             }
         }
 
@@ -309,7 +324,10 @@ namespace Vbyte.DataSource.Utility
         {
             long iIdx = 0;
             int iLen = 0;
-            long nDataIndex = HEAD_SUMMARY_BYTES + (long)GetIndexSize() + MAX_DIRTYBLOCK_SIZE;
+            //Read
+            long nDataIndex = GetOffSetDat<long>(_internalReader, 16);
+            if (nDataIndex == 0) nDataIndex = HEAD_SUMMARY_BYTES + (long)GetIndexSize() + MAX_DIRTYBLOCK_SIZE;
+            Console.WriteLine("Store Index: {0}", nDataIndex);
 
             bool addNew = false, append = false;
             SortedList<string, KeyValueState> idxObj = GetIndexObject(null);
@@ -373,7 +391,8 @@ namespace Vbyte.DataSource.Utility
             if (append)
             {
                 storeStream.SetLength(storeStream.Length + kDat.Length);
-                nDataIndex = storeStream.Length;
+                //nDataIndex = storeStream.Length;
+                KeepPositionWrite(16, BitConverter.GetBytes(nDataIndex + kDat.LongLength));
             }
             kState.DataIndex = nDataIndex;
 
@@ -390,11 +409,13 @@ namespace Vbyte.DataSource.Utility
 
             byte[] idxBytes = FileWrapHelper.GetBytes(IndexObject);
             //更新索引内容实际大小
-            if (UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 12))
+            if (UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 24))
             {
                 IncrementIndexSize();
-                UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 12);
+                nDataIndex += INDEX_INCREMENT_STEP;
+                UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 24);
             }
+            Console.WriteLine("Store Index: {0}", nDataIndex);
             KeepPositionWrite(nDataIndex, kDat);
             return true;
         }
@@ -455,23 +476,108 @@ namespace Vbyte.DataSource.Utility
         }
         #endregion
 
+        /// <summary>
+        /// 重新调整索引文件头空间（增加或压缩）
+        /// </summary>
+        /// <param name="idxNewSize">新的索引空间大小，为0则执行压缩。</param>
+        /// <param name="outStream">调整大小时的输出字节序列</param>
+        /// <returns>是否进行了相关操作</returns>
+        private bool RefactHeadIndexSize(int idxNewSize, Stream outStream)
+        {
+            int oldIdxSize = GetIndexSize();
+            int fileHeadSize = GetFileHeadSize();
+
+            //索引空间大小不变
+            if (oldIdxSize == idxNewSize) return false;
+
+            int oldOffSet = (int)GetDataReadOffset();
+            int iTotalIdx = GetNextIndexWriteOffset();
+            long IdxOffset = GetDataIndexOffset();
+
+            //执行压缩
+            if (iTotalIdx > idxNewSize) idxNewSize = iTotalIdx;
+            long nFileLen = storeStream.Length + idxNewSize - oldIdxSize;
+            int nOffSet = oldOffSet + idxNewSize - oldIdxSize;
+
+            //Console.WriteLine("新文件长度：{0}， 数据偏移量：{1}", nFileLen, oldOffSet);
+            //Console.WriteLine("新偏移量：{0}", nOffSet);
+            //Console.WriteLine("旧存储空间：{0}", oldIdxSize);
+            //Console.WriteLine("已占用空间：{0}", iTotalIdx);
+            //Console.WriteLine("修改后空间：{0}", idxNewSize);
+
+            //更新索引偏移量条件
+            if (nFileLen <= 0 || nOffSet == oldOffSet) return false;
+
+            #region 复制旧索引及开始数据
+            byte[] buffer = new byte[oldIdxSize];
+            outStream.SetLength(nFileLen);
+            outStream.Position = 0;
+            storeStream.Position = 0;
+            storeStream.Read(buffer, 0, oldIdxSize);
+            outStream.Write(buffer, 0, oldIdxSize);
+            #endregion
+
+            #region 更新偏移量
+            if (IndexSizeChange != null) IndexSizeChange(idxNewSize, outStream);
+            if (IdxOffset > 0)
+            {
+                outStream.Position = IdxOffset;
+                buffer = new byte[4];
+                buffer = BitConverter.GetBytes(nOffSet);
+                //Console.WriteLine("修改新偏移量为：{0}", nOffSet);
+                outStream.Write(buffer, 0, buffer.Length);
+            }
+            #endregion
+
+            #region 分段读取并写入
+            outStream.Position = idxNewSize;
+            //Console.WriteLine("POS：{0}", idxNewSize); nOffSet
+            //Console.WriteLine("Offset New：{0}", nOffSet); 
+
+            int currentRead = 0;
+
+            int lTest = 4096;
+            buffer = new byte[lTest];
+            while ((currentRead = storeStream.Read(buffer, 0, lTest)) != 0)
+            {
+                //Console.WriteLine("read:{0}", currentRead);
+                outStream.Write(buffer, 0, currentRead);
+                outStream.Flush();
+                //Console.WriteLine();
+                //Console.WriteLine(Utility.FileWrapHelper.GetHexViewString(buffer));
+                //Console.WriteLine();
+            }
+            outStream.Flush();
+            #endregion
+
+            return true;
+        }
+
         private void IncrementIndexSize()
         {
+            //Console.WriteLine("Idx Size: {0}", GetIndexSize());
+            //Console.WriteLine("Real Size: {0}", GetIndexRealSize());
+            //Console.WriteLine("Dat Offset：{0}", GetDataReadOffset());
+            //Console.WriteLine("Dirty Size: {0}", GetDirtyBlockRealSize());
+            //Console.WriteLine("Version: {0}", GetStoreVersion());
+            //Console.WriteLine("Keys Count: {0}", GetKeyCount());
+
             Console.WriteLine("动态增加索引空间");
 
             long oldPos = base.storeStream.Position;
-
+            int oldIdxSize = GetIndexSize();
             string nFileName = FilePath + ".tmp";
             FileStream nFStream = new FileStream(nFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
             base.IndexSizeChange = new RefreshIndexSizeChange((size, stm) => {
                     byte[] buffer = new byte[4];
-                    buffer = BitConverter.GetBytes(size);
+                    buffer = BitConverter.GetBytes(oldIdxSize + INDEX_INCREMENT_STEP);
                     stm.Position = 8;
                     stm.Write(buffer, 0, buffer.Length);
                 });
 
-            bool result = RefactHeadIndexSize(GetIndexSize() + INDEX_INCREMENT_STEP, nFStream);
+            bool result = RefactHeadIndexSize(oldIdxSize + INDEX_INCREMENT_STEP,
+                nFStream);
             nFStream.Close();
             nFStream.Dispose();
             if (result == false) File.Delete(nFileName);

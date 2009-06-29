@@ -26,14 +26,14 @@ namespace Vbyte.DataSource.UnitTest
         public void StoreKeyTest()
         {
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
-            for (int i = 0; i < 100; i++)
-            {
-                fs.StoreKeyData( i + "test" + DateTime.Now.Ticks, Encoding.Default.GetBytes("Hello word! (" + i + ")"));
-            }
-            //fs.StoreKeyData("hi", Encoding.Default.GetBytes("Hello word!"));
-            //fs.StoreKeyData("h1", Encoding.Default.GetBytes("Hello word! 100 A"));
-            //fs.StoreKeyData("h2", Encoding.Default.GetBytes("Hello word! 200 B"));
-            //fs.StoreKeyData("h3", Encoding.Default.GetBytes("Hello word! 300 C"));
+            //for (int i = 0; i < 47; i++)
+            //{
+                int i = 0;
+                fs.StoreKeyData("debugtest", Encoding.Default.GetBytes("Hello word! (" + i + ")"));
+
+                //Console.WriteLine(i);
+                //fs.StoreKeyData(i + "test" + DateTime.Now.Ticks, Encoding.Default.GetBytes("Hello word! (" + i + ")"));
+            //}
             fs.Dispose();
         }
 
@@ -69,9 +69,11 @@ namespace Vbyte.DataSource.UnitTest
         public void GetKeyTest()
         {
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
+            
             string[] keys = fs.GetAllKeys();
-            foreach (string k in keys)
-            {
+            //foreach (string k in keys)
+            //{
+                string k = "debugtest";
                 byte[] kDat = fs.GetKeyData(k);
                 if (kDat.Length > 0)
                 {
@@ -81,7 +83,7 @@ namespace Vbyte.DataSource.UnitTest
                 {
                     Console.WriteLine("Key: {0}, Len: [{1}]", k, kDat.Length);
                 }
-            }
+            //}
             fs.Dispose();
         }
 
@@ -91,10 +93,11 @@ namespace Vbyte.DataSource.UnitTest
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
             Console.WriteLine("Idx Size: {0}", fs.GetIndexSize());
             Console.WriteLine("Real Size: {0}", fs.GetIndexRealSize());
+            Console.WriteLine("Dat Offset：{0}", fs.GetDataReadOffset());
             Console.WriteLine("Dirty Size: {0}", fs.GetDirtyBlockRealSize());
             Console.WriteLine("Version: {0}", fs.GetStoreVersion());
             Console.WriteLine("Keys Count: {0}", fs.GetKeyCount());
-            Console.WriteLine("Keys: {0}", string.Join("\n", fs.GetAllKeys()));
+            //Console.WriteLine("Keys: {0}", string.Join("\n", fs.GetAllKeys()));
             fs.Dispose();
         }
 

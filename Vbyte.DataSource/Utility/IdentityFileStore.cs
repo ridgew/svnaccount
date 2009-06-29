@@ -155,6 +155,81 @@ namespace Vbyte.DataSource.Utility
         /// 重新调整索引文件头空间（增加或压缩）
         /// </summary>
         /// <param name="idxNewSize">新的索引空间大小，为0则执行压缩。</param>
+        /// <param name="outStream">调整大小时的输出字节序列</param>
+        /// <returns>是否进行了相关操作</returns>
+        private bool RefactHeadIndexSize(int idxNewSize, Stream outStream)
+        {
+            int oldIdxSize = GetIndexSize();
+            //索引空间大小不变
+            if (oldIdxSize == idxNewSize) return false;
+
+            int oldOffSet = (int)GetDataReadOffset();
+            int iTotalIdx = GetNextIndexWriteOffset();
+            long IdxOffset = GetDataIndexOffset();
+
+            //执行压缩
+            if (iTotalIdx > idxNewSize) idxNewSize = iTotalIdx;
+            long nFileLen = storeStream.Length + idxNewSize - oldIdxSize;
+            int nOffSet = oldOffSet + idxNewSize - oldIdxSize;
+
+            //Console.WriteLine("新文件长度：{0}， 数据偏移量：{1}", nFileLen, oldOffSet);
+            //Console.WriteLine("新偏移量：{0}", nOffSet);
+            //Console.WriteLine("旧存储空间：{0}", oldIdxSize);
+            //Console.WriteLine("已占用空间：{0}", iTotalIdx);
+            //Console.WriteLine("修改后空间：{0}", idxNewSize);
+
+            //更新索引偏移量条件
+            if (nFileLen <= 0 || nOffSet == oldOffSet) return false;
+
+            #region 复制旧索引及开始数据
+            byte[] buffer = new byte[oldIdxSize];
+            outStream.SetLength(nFileLen);
+            outStream.Position = 0;
+            storeStream.Position = 0;
+            storeStream.Read(buffer, 0, oldIdxSize);
+            outStream.Write(buffer, 0, oldIdxSize);
+            #endregion
+
+            #region 更新偏移量
+            if (IndexSizeChange != null) IndexSizeChange(idxNewSize, outStream);
+            if (IdxOffset > 0)
+            {
+                outStream.Position = IdxOffset;
+                buffer = new byte[4];
+                buffer = BitConverter.GetBytes(nOffSet);
+                //Console.WriteLine("修改新偏移量为：{0}", nOffSet);
+                outStream.Write(buffer, 0, buffer.Length);
+            }
+            #endregion
+
+            #region 分段读取并写入
+            outStream.Position = idxNewSize;
+            //Console.WriteLine("POS：{0}", idxNewSize); nOffSet
+            //Console.WriteLine("Offset New：{0}", nOffSet); 
+
+            int currentRead = 0;
+
+            int lTest = 4096;
+            buffer = new byte[lTest];
+            while ((currentRead = storeStream.Read(buffer, 0, lTest)) != 0)
+            {
+                //Console.WriteLine("read:{0}", currentRead);
+                outStream.Write(buffer, 0, currentRead);
+                outStream.Flush();
+                //Console.WriteLine();
+                //Console.WriteLine(Utility.FileWrapHelper.GetHexViewString(buffer));
+                //Console.WriteLine();
+            }
+            outStream.Flush();
+            #endregion
+
+            return true;
+        }
+
+        /// <summary>
+        /// 重新调整索引文件头空间（增加或压缩）
+        /// </summary>
+        /// <param name="idxNewSize">新的索引空间大小，为0则执行压缩。</param>
         /// <returns>是否进行了相关操作</returns>
         internal bool RefactHeadIndex(int idxNewSize)
         {
@@ -304,6 +379,14 @@ namespace Vbyte.DataSource.Utility
         public override int GetIndexSize()
         {
             return GetOffSetDat<int>(_internalReader, DATA_INDEX_OFFSET - 4);
+        }
+
+        /// <summary>
+        /// 获取非数据区的文件头数据大小
+        /// </summary>
+        public override int GetFileHeadSize()
+        {
+            return GetIndexSize();
         }
 
         /// <summary>
