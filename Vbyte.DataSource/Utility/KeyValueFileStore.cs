@@ -33,9 +33,12 @@ namespace Vbyte.DataSource.Utility
         private void ReInitial()
         {
             storeStream = null;
-
             InitialFileStream();
+
+            _internalReader = null;
             InitializeReader();
+
+            _internalWriter = null;
             InitializeWriter();
         }
 
@@ -47,7 +50,7 @@ namespace Vbyte.DataSource.Utility
 
         private void InitialFileStream()
         {
-            if (base.storeStream == null)
+            if (storeStream == null)
             {
                 storeStream = new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
             }
@@ -88,7 +91,7 @@ namespace Vbyte.DataSource.Utility
         /// <returns></returns>
         public override int GetIndexSize()
         {
-            if (_currentIndexSize < HeadIndexLength)
+            if (_currentIndexSize !=0 || _currentIndexSize != HeadIndexLength)
             {
                _currentIndexSize = GetOffSetDat<int>(_internalReader, 8);
             }
@@ -341,9 +344,27 @@ namespace Vbyte.DataSource.Utility
                         kState.ChipSize = 0;
                         append = true;
 
-                        #region ADD Dirty Block
+                        SortedList<long, DirtyBlock> dirtyDat = GetStoreDirtyData();
+                        
+                        #region Dirty Block
                         DirtyBlock dBlock = new DirtyBlock { DataIndex = oldState.DataIndex, Length = oldState.Length + kState.ChipSize };
                         Console.WriteLine("Dirty: {0}+{1}", dBlock.DataIndex, dBlock.Length);
+                        if (DirtyObject.ContainsKey(dBlock.DataIndex))
+                        {
+                            //[impossible]
+                            DirtyObject[dBlock.DataIndex] = dBlock;
+                        }
+                        else
+                        {
+                            DirtyObject.Add(dBlock.DataIndex, dBlock);
+                        }
+
+                        byte[] dBytes = FileWrapHelper.GetBytes(DirtyObject);
+                        if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
+                        {
+                            ClearDirtyData();
+                            UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9);
+                        }
                         #endregion
                     }
                 }
@@ -415,7 +436,6 @@ namespace Vbyte.DataSource.Utility
                 }
 
                 byte[] dBytes = FileWrapHelper.GetBytes(DirtyObject);
-                //更新索引内容实际大小
                 if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
                 {
                     ClearDirtyData();
@@ -436,7 +456,9 @@ namespace Vbyte.DataSource.Utility
         #endregion
 
         private void IncrementIndexSize()
-        { 
+        {
+            Console.WriteLine("动态增加索引空间");
+
             long oldPos = base.storeStream.Position;
 
             string nFileName = FilePath + ".tmp";
@@ -462,7 +484,7 @@ namespace Vbyte.DataSource.Utility
                 base.storeStream = null;
 
                 File.Delete(FilePath);
-                //Console.WriteLine("Delete {0} OK!", FilePath);
+                Console.WriteLine("Delete {0} OK!", FilePath);
 
                 FileInfo nFileInfo = new FileInfo(nFileName);
                 nFileInfo.MoveTo(FilePath);
@@ -470,7 +492,6 @@ namespace Vbyte.DataSource.Utility
             #endregion
 
             ReInitial();
-            IndexObject = null;
 
             if (oldPos < base.storeStream.Length)
             {

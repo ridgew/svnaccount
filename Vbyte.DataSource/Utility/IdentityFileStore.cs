@@ -191,6 +191,7 @@ namespace Vbyte.DataSource.Utility
             #endregion
 
             InitialFileStream();
+            _internalReader = null;
             InitializeReader();
 
             if (oldPos < base.storeStream.Length)

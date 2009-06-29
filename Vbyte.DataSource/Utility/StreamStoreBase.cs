@@ -109,12 +109,12 @@ namespace Vbyte.DataSource.Utility
 
         protected void InitializeReader()
         {
-            if (_internalReader == null || _internalReader.BaseStream == null) _internalReader = new BinaryReader(storeStream);
+            if (_internalReader == null) _internalReader = new BinaryReader(storeStream);
         }
 
         protected void InitializeWriter()
         {
-            if (_internalWriter == null || _internalWriter.BaseStream == null) _internalWriter = new BinaryWriter(storeStream);
+            if (_internalWriter == null) _internalWriter = new BinaryWriter(storeStream);
         }
 
         /// <summary>
