@@ -432,7 +432,7 @@ namespace Vbyte.DataSource.Utility
         public bool RemoveData(string key)
         {
             long iIdx = 0;
-            int iLen = 0;
+            int iLen = 0, CurrentIndexSize = GetIndexSize();
             if (!ExistsDataKey(key, out iIdx, out iLen))
             {
                 return false;
@@ -441,14 +441,17 @@ namespace Vbyte.DataSource.Utility
             {
                 //remove index data, make as dirty
                 IndexObject.Remove(key);
-                SetKeyCount(IndexObject.Count);
+                SetKeyCount(GetKeyCount() - 1);
 
                 byte[] idxBytes = FileWrapHelper.GetBytes(IndexObject);
                 //更新索引内容实际大小
-                if (UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 12))
+                if (UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, CurrentIndexSize, 24))
                 {
                     IncrementIndexSize();
-                    UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, GetIndexSize(), 12);
+                    UpdateDynamicBytes((long)GetNextIndexWriteOffset(), idxBytes, CurrentIndexSize, 24);
+
+                    _currentDatOffset = GetOffSetDat<int>(_internalReader, 12);
+                    CurrentIndexSize = GetIndexSize();
                 }
 
                 #region Update Dirty Block
@@ -465,10 +468,10 @@ namespace Vbyte.DataSource.Utility
                 }
 
                 byte[] dBytes = FileWrapHelper.GetBytes(DirtyObject);
-                if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
+                if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
                 {
                     ClearDirtyData();
-                    UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + GetIndexSize()), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9);
+                    UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9);
                 }
                 #endregion
 
