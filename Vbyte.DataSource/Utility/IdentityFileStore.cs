@@ -100,13 +100,8 @@ namespace Vbyte.DataSource.Utility
 
             _internalWriter.Write(BitConverter.GetBytes((uint)0));                                  //当前版本                      +4
             _internalWriter.Write(BitConverter.GetBytes(0L));                                       //数据文件长度                  +8
-            _internalWriter.Write(BitConverter.GetBytes((int)61));                                  //文件头结束索引(下次写入位置)  +4
+            _internalWriter.Write(BitConverter.GetBytes((int)33));                                  //文件头结束索引(下次写入位置)  +4
             _internalWriter.Write('\n');                                                            //                              +1
-
-            _internalWriter.Write(BitConverter.GetBytes((uint)0));                                  //数据版本                      +4
-            _internalWriter.Write(BitConverter.GetBytes(DateTime.Now.ToUniversalTime().Ticks));     //创建时间                      +8
-            _internalWriter.Write(BitConverter.GetBytes((long)HeadIndexLength));                    //数据开始开始所在索引          +8
-            _internalWriter.Write(BitConverter.GetBytes(0L));                                       //数据文件长度                  +8
         }
 
         /// <summary>
@@ -129,10 +124,9 @@ namespace Vbyte.DataSource.Utility
             //Console.WriteLine("文件头索引写入位置：{0}", curHWIdx);
             if (curHWIdx > datWOffset - SINGLE_VERSION_UNIT)
             {
-                //Console.WriteLine("索引空间增加为：{0}", datWOffset + HeadIndexLength);
-                //Console.WriteLine("Refact: {0}", RefactHeadIndex(datWOffset + HeadIndexLength));
+                Console.WriteLine("索引空间增加为：{0}", datWOffset + HeadIndexLength);
+                Console.WriteLine("Refact: {0}", RefactHeadIndex(datWOffset + HeadIndexLength));
                 RefactHeadIndex(datWOffset + HeadIndexLength);
-                ReInitial();
             }
 
             _internalWriter.Seek(LASTED_VERSION_OFFSET, SeekOrigin.Begin);
@@ -265,10 +259,10 @@ namespace Vbyte.DataSource.Utility
 
                 FileInfo nFileInfo = new FileInfo(nFileName);
                 nFileInfo.MoveTo(FilePath);
+
+                ReInitial();
             }
             #endregion
-
-            ReInitial();
 
             if (oldPos < base.storeStream.Length)
             {
@@ -327,7 +321,7 @@ namespace Vbyte.DataSource.Utility
 
         private void InitialFileStream()
         {
-            if (base.storeStream == null)
+            if (storeStream == null)
             {
                 storeStream = new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
             }

@@ -625,10 +625,10 @@ namespace Vbyte.DataSource.Utility
 
                 FileInfo nFileInfo = new FileInfo(nFileName);
                 nFileInfo.MoveTo(FilePath);
+
+                ReInitial();
             }
             #endregion
-
-            ReInitial();
 
             if (oldPos < base.storeStream.Length)
             {
