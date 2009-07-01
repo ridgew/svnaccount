@@ -10,7 +10,7 @@ namespace Vbyte.DataSource.UnitTest
     public class SortKeyTest
     {
         private readonly string localFile = AppDomain.CurrentDomain.BaseDirectory + "\\KValue.dat";
-        
+
         [Test]
         public void temp()
         {
@@ -23,17 +23,39 @@ namespace Vbyte.DataSource.UnitTest
         }
 
         [Test]
+        public void GetKeyTest()
+        {
+            KeyValueFileStore fs = new KeyValueFileStore(localFile);
+
+            string[] keys = fs.GetAllKeys();
+            foreach (string k in keys)
+            {
+                //string k = "debugtest";
+                byte[] kDat = fs.GetKeyData(k);
+                if (kDat.Length > 0)
+                {
+                    Console.WriteLine("Key: {0}, Data: [{1}]", k, Encoding.Default.GetString(kDat));
+                }
+                else
+                {
+                    Console.WriteLine("Key: {0}, Len: [{1}]", k, kDat.Length);
+                }
+            }
+            fs.Dispose();
+        }
+
+        [Test]
         public void StoreKeyTest()
         {
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
-            //for (int i = 0; i < 47; i++)
-            //{
-                int i = 0;
-                fs.StoreKeyData("debugtest", Encoding.Default.GetBytes("Hello word! (" + i + ")"));
+            for (int i = 0; i < 1; i++)
+            {
+                //int i = 0;
+                //fs.StoreKeyData("debugtest", Encoding.Default.GetBytes("Hello word! (" + i + ")"));
 
                 //Console.WriteLine(i);
-                //fs.StoreKeyData(i + "test" + DateTime.Now.Ticks, Encoding.Default.GetBytes("Hello word! (" + i + ")"));
-            //}
+                fs.StoreKeyData(i + "test" + DateTime.Now.Ticks, Encoding.Default.GetBytes("Hello word! (" + i + ")"));
+            }
             fs.Dispose();
         }
 
@@ -42,7 +64,7 @@ namespace Vbyte.DataSource.UnitTest
         {
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
             Console.WriteLine(fs.ExistsKey("hi"));
-            fs.Dispose(); 
+            fs.Dispose();
         }
 
         [Test]
@@ -65,27 +87,7 @@ namespace Vbyte.DataSource.UnitTest
             fs.Dispose();
         }
 
-        [Test]
-        public void GetKeyTest()
-        {
-            KeyValueFileStore fs = new KeyValueFileStore(localFile);
-            
-            string[] keys = fs.GetAllKeys();
-            //foreach (string k in keys)
-            //{
-                string k = "debugtest";
-                byte[] kDat = fs.GetKeyData(k);
-                if (kDat.Length > 0)
-                {
-                    Console.WriteLine("Key: {0}, Data: [{1}]", k, Encoding.Default.GetString(kDat));
-                }
-                else
-                {
-                    Console.WriteLine("Key: {0}, Len: [{1}]", k, kDat.Length);
-                }
-            //}
-            fs.Dispose();
-        }
+
 
         [Test]
         public void StoreSummary()
