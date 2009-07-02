@@ -232,15 +232,6 @@ namespace Vbyte.DataSource.Utility
 
         public int GetKeyCount()
         {
-            //SortedList<string, KeyValueState> idxObject = GetIndexObject(null);
-            //if (idxObject != null)
-            //{
-            //    return idxObject.Count;
-            //}
-            //else
-            //{
-            //    return 0;
-            //}
             return GetOffSetDat<int>(_internalReader, HEAD_SUMMARY_BYTES - 5);
         }
 
@@ -313,7 +304,7 @@ namespace Vbyte.DataSource.Utility
             }
             else
             {
-                Console.WriteLine("Debug: offset {2} , {0} + {1}", iIdx, iLen, _currentDatOffset);
+                //Console.WriteLine("Debug: offset {2} , {0} + {1}", iIdx, iLen, _currentDatOffset);
                 return ReadData(iIdx + _currentDatOffset, iLen);
             }
         }
@@ -374,7 +365,7 @@ namespace Vbyte.DataSource.Utility
                             //下次写入数据索引
                             KeepPositionWrite(16, BitConverter.GetBytes(nDataIndex + kDat.LongLength));
 
-                            Console.WriteLine("Location Append");
+                            //Console.WriteLine("Location Append");
                         }
                         else
                         {
@@ -382,7 +373,7 @@ namespace Vbyte.DataSource.Utility
                             SortedList<long, DirtyBlock> dirtyDat = GetStoreDirtyData();
                             #region Dirty Block
                             DirtyBlock dBlock = new DirtyBlock { DataIndex = oldState.DataIndex, Length = oldState.Length + kState.ChipSize };
-                            Console.WriteLine("Dirty: {0}+{1}", dBlock.DataIndex, dBlock.Length);
+                            //Console.WriteLine("Dirty: {0}+{1}", dBlock.DataIndex, dBlock.Length);
                             if (DirtyObject.ContainsKey(dBlock.DataIndex))
                             {
                                 //[impossible]
@@ -413,7 +404,7 @@ namespace Vbyte.DataSource.Utility
                 //下次写入数据索引
                 KeepPositionWrite(16, BitConverter.GetBytes(nDataIndex + kDat.LongLength));
 
-                Console.WriteLine("test:{0}, {1}, {2}", nDataIndex, _currentDatOffset, nDataIndex - _currentDatOffset);
+                //Console.WriteLine("test:{0}, {1}, {2}", nDataIndex, _currentDatOffset, nDataIndex - _currentDatOffset);
                 kState.DataIndex = nDataIndex - _currentDatOffset;
             }
 
@@ -506,11 +497,43 @@ namespace Vbyte.DataSource.Utility
             }
         }
 
-        //[TODO]
         public bool Compact()
         {
             //删除DirtyBlock数据，及KeyValue数据区的碎片
-            return false;
+            return ShrinkStoreSize(false);
+        }
+
+        //[TODO]
+        private bool ShrinkStoreSize(bool clearDirtyOnly)
+        {
+            /*
+            1.复制有效数据  OR 2.位移有效数据
+            3.更新有效数据的原始索引
+            4.更新索引数据块
+            */
+            if (!clearDirtyOnly)
+            {
+                //复制有效数据
+                SortedList<string, KeyValueState> idxObjs = GetIndexObject(0);
+            }
+            else
+            {
+                //位移连接有效数据
+                SortedList<long, DirtyBlock> dObjs = GetStoreDirtyData();
+            }
+
+            #region 清空DirtyBlock
+            //DirtyObject.Clear();
+            //int CurrentIndexSize = GetIndexSize();
+            //byte[] dBytes = FileWrapHelper.GetBytes(DirtyObject);
+            //if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
+            //{
+            //    ClearDirtyData();
+            //    UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9);
+            //}
+            #endregion
+
+            return true;
         }
         #endregion
 
@@ -666,27 +689,9 @@ namespace Vbyte.DataSource.Utility
             }
         }
 
-        //[TODO]
         private void ClearDirtyData()
         {
-            SortedList<long, DirtyBlock> dObjs = GetStoreDirtyData();
-
-            #region 整合数据
-            /*
-             1.复制有效数据  OR 2.位移有效数据
-             3.更新有效数据的原始索引
-             4.更新索引数据块
-             */
-            #endregion
-
-            DirtyObject.Clear();
-            int CurrentIndexSize = GetIndexSize();
-            byte[] dBytes = FileWrapHelper.GetBytes(DirtyObject);
-            if (UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9))
-            {
-                ClearDirtyData();
-                UpdateDynamicBytes((long)(HEAD_SUMMARY_BYTES + CurrentIndexSize), dBytes, MAX_DIRTYBLOCK_SIZE, HEAD_SUMMARY_BYTES - 9);
-            }   
+            ShrinkStoreSize(true); 
         }
 
         //更新索引的脏数据区域
