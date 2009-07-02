@@ -31,14 +31,17 @@ namespace Vbyte.DataSource.UnitTest
             foreach (string k in keys)
             {
                 //string k = "debugtest";
-                byte[] kDat = fs.GetKeyData(k);
-                if (kDat.Length > 0)
+                if (k.StartsWith("debug"))
                 {
-                    Console.WriteLine("Key: {0}, Data: [{1}]", k, Encoding.Default.GetString(kDat));
-                }
-                else
-                {
-                    Console.WriteLine("Key: {0}, Len: [{1}]", k, kDat.Length);
+                    byte[] kDat = fs.GetKeyData(k);
+                    if (kDat.Length > 0)
+                    {
+                        Console.WriteLine("Key: {0}, Data: [{1}]", k, Encoding.Default.GetString(kDat));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Key: {0}, Len: [{1}]", k, kDat.Length);
+                    }
                 }
             }
             fs.Dispose();
@@ -77,17 +80,53 @@ namespace Vbyte.DataSource.UnitTest
                 Console.WriteLine("Not Null, {0}", idxObject.Count);
                 foreach (string k in idxObject.Keys)
                 {
-                    Console.WriteLine("Key: {0}, IDX: {1}, Len: {2}, ChipSize: {3}", k,
-                        idxObject[k].DataIndex,
-                        idxObject[k].Length,
-                        idxObject[k].ChipSize);
+                    if (k.StartsWith("debug"))
+                    {
+                        Console.WriteLine("Key: {0}, IDX: {1}, Len: {2}, ChipSize: {3}", k,
+                            idxObject[k].DataIndex,
+                            idxObject[k].Length,
+                            idxObject[k].ChipSize);
+                    }
                     //Console.WriteLine(" a " + k);
                 }
             }
             fs.Dispose();
         }
 
+        [Test]
+        public void DirtyBlockViewTest()
+        {
+            KeyValueFileStore fs = new KeyValueFileStore(localFile);
+            SortedList<long, DirtyBlock> dObjs = fs.GetStoreDirtyData();
+            if (dObjs != null)
+            {
+                Console.WriteLine("Not Null, {0}", dObjs.Count);
+                foreach (long k in dObjs.Keys)
+                {
+                    Console.WriteLine("Key: {0}, IDX: {1}, Len: {2}", k,
+                        dObjs[k].DataIndex,
+                        dObjs[k].Length);
+                    //Console.WriteLine(" a " + k);
+                }
+            }
+            fs.Dispose();
+        }
 
+        [Test]
+        public void UpdateKeyDataTest()
+        {
+            KeyValueFileStore fs = new KeyValueFileStore(localFile);
+            fs.StoreKeyData("debugtest3", Encoding.Default.GetBytes("---+++"));
+            fs.Dispose();
+        }
+
+        [Test]
+        public void RemoveKeyDataTest()
+        {
+            KeyValueFileStore fs = new KeyValueFileStore(localFile);
+            Console.WriteLine(fs.RemoveData("debugtest1"));
+            fs.Dispose();
+        }
 
         [Test]
         public void StoreSummary()
@@ -95,6 +134,7 @@ namespace Vbyte.DataSource.UnitTest
             KeyValueFileStore fs = new KeyValueFileStore(localFile);
             Console.WriteLine("Idx Size: {0}", fs.GetIndexSize());
             Console.WriteLine("Real Size: {0}", fs.GetIndexRealSize());
+            Console.WriteLine("Next Write Idx: {0}", fs.GetNextDataWriteIndex());
             Console.WriteLine("Dat Offset：{0}", fs.GetDataReadOffset());
             Console.WriteLine("Dirty Size: {0}", fs.GetDirtyBlockRealSize());
             Console.WriteLine("Version: {0}", fs.GetStoreVersion());
