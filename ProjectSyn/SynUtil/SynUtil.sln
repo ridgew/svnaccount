@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynUtil", "SynUtil.csproj", "{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		UnitTest|Any CPU = UnitTest|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.UnitTest|Any CPU.ActiveCfg = UnitTest|Any CPU
+		{3DF372CA-6A2A-40BE-B190-80C7CCA9AFD5}.UnitTest|Any CPU.Build.0 = UnitTest|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
