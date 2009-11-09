@@ -66,6 +66,136 @@ namespace SynUtil
         {
             return false;
         }
+
+        internal protected bool GetRegxPatternActived(Func<string> cmpString)
+        {
+            string cmpSet = Setting.Trim();
+            int idxLast = cmpSet.Length - 1;
+            string myPattern = cmpSet.Replace("?", "\\w");
+
+            //以"/"包含的为正则表达式模式定义
+            if (cmpSet.Length > 2 && cmpSet[0] == '/'
+                && cmpSet[idxLast] == '/')
+            {
+                myPattern = cmpSet.Substring(1, idxLast - 1);
+            }
+            else
+            {
+                if (myPattern[0] == '*')
+                {
+                    myPattern = Regex.Escape(myPattern.Substring(1)) + "$";
+                }
+
+                idxLast = myPattern.Length - 1;
+                if (idxLast > 0 && myPattern[idxLast] == '*')
+                {
+                    myPattern = "^" + Regex.Escape(myPattern.Substring(0, idxLast));
+                }
+            }
+            return Regex.IsMatch(cmpString(), myPattern, RegexOptions.IgnoreCase);
+        }
+
+        internal protected bool GetTimeActived(Func<DateTime> cmpTime)
+        {
+            bool blnRet = false;
+            DateTime tTime = cmpTime();
+            string cmpSet = Setting.Trim();
+
+            int idxLast = cmpSet.Length - 1;
+            if (cmpSet.IndexOf('-') != -1 && cmpSet.Length > 3
+                && (cmpSet[0] == '[' || cmpSet[0] == '(')
+                && (cmpSet[idxLast] == ']' || cmpSet[idxLast] == ')'))
+            {
+                bool leftVal = false, rightVal = false;
+                string[] tVals = cmpSet.Split('-');
+
+                if (tVals.Length == 2)
+                {
+                    leftVal = (cmpSet[0] == '[') ? IsTimeMatch(">=" + tVals[0].TrimStart('(', '['), tTime) : IsTimeMatch(">" + tVals[0].TrimStart('(', '['), tTime);
+                    rightVal = (cmpSet[0] == ']') ? IsTimeMatch("<=" + tVals[1], tTime) : IsTimeMatch("<" + tVals[1], tTime);
+                }
+
+                blnRet = leftVal && rightVal;
+            }
+            else
+            {
+                blnRet = IsTimeMatch(cmpSet, tTime);
+            }
+            return blnRet;
+        }
+
+        internal static bool IsTimeMatch(string timeExp, DateTime tTime)
+        {
+            bool blnRet = false;
+            string cmpSet = timeExp.Trim(new char[] { ' ', '[', ']', '(', ')' });
+
+            // > >= == < <=
+            int nIndex = GlobalUtil.FindFirstNumber(cmpSet);
+            if (nIndex == -1)
+            {
+                throw new InvalidOperationException("时间值规则定义错误，必须包含数字(以及比较符号> >= == < <=) !");
+            }
+
+            string cmpStr = cmpSet.Substring(0, nIndex).Trim();
+            string cmpValue = cmpSet.Substring(nIndex).Trim();
+
+            if (cmpStr == ">")
+            {
+                blnRet = Convert.ToDateTime(cmpValue) > tTime;
+            }
+            else if (cmpStr == ">=")
+            {
+                blnRet = Convert.ToDateTime(cmpValue) >= tTime;
+            }
+            else if (cmpStr == "==")
+            {
+                blnRet = Convert.ToDateTime(cmpValue) == tTime;
+            }
+            else if (cmpStr == "<")
+            {
+                blnRet = Convert.ToDateTime(cmpValue) < tTime;
+            }
+            else if (cmpStr == "<=")
+            {
+                blnRet = Convert.ToDateTime(cmpValue) <= tTime;
+            }
+            return blnRet;
+        }
+
+        internal protected bool GetAttributeActived(Func<FileAttributes> testAttr)
+        {
+            FileAttributes tAttr = testAttr();
+            bool blnRet = false;
+            string cmpSet = Setting.Trim();
+            Type AttrType = typeof(FileAttributes);
+            if (cmpSet.IndexOf('|') == -1)
+            {
+                if (Enum.IsDefined(AttrType, cmpSet))
+                {
+                    FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
+                    blnRet = (tAttr & cmpAttr) == cmpAttr;
+                }
+            }
+            else
+            {
+                //多个属性条件合并
+                string[] diffAtts = cmpSet.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                bool attrMatch = false;
+                for (int i = 0, j = diffAtts.Length; i < j; i++)
+                {
+                    cmpSet = diffAtts[i].Trim();
+                    if (Enum.IsDefined(AttrType, cmpSet))
+                    {
+                        FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
+                        attrMatch = (tAttr & cmpAttr) == cmpAttr;
+
+                        if (!attrMatch) break;
+                    }
+                }
+                blnRet = attrMatch;
+            }
+            return blnRet;
+        }
     }
 
     #region FileInfo Rules
@@ -219,36 +349,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(FileInfo fInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-            Type AttrType = typeof(FileAttributes);
-            if (cmpSet.IndexOf('|') == -1)
-            {
-                if (Enum.IsDefined(AttrType, cmpSet))
-                {
-                    FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
-                    blnRet = (fInfo.Attributes & cmpAttr) == cmpAttr;
-                }
-            }
-            else
-            {
-                //多个属性条件合并
-                string[] diffAtts = cmpSet.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                bool attrMatch = false;
-                for (int i = 0, j = diffAtts.Length; i < j; i++)
-                {
-                    cmpSet = diffAtts[i].Trim();
-                    if (Enum.IsDefined(AttrType, cmpSet))
-                    {
-                        FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
-                        attrMatch = (fInfo.Attributes & cmpAttr) == cmpAttr;
-
-                        if (!attrMatch)  break;
-                    }
-                }
-                blnRet = attrMatch;
-            }
-            return blnRet;
+            return GetAttributeActived(() => fInfo.Attributes);
         }
     }
 
@@ -267,30 +368,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(FileInfo fInfo)
         {
-            string cmpSet = Setting.Trim();
-            int idxLast = cmpSet.Length - 1;
-            string myPattern = cmpSet.Replace("?", "\\w");
-
-            //以"/"包含的为正则表达式模式定义
-            if (cmpSet.Length > 2 && cmpSet[0] == '/'
-                && cmpSet[idxLast] == '/')
-            {
-                myPattern = cmpSet.Substring(1, idxLast - 1);
-            }
-            else
-            {
-                if (myPattern[0] == '*')
-                {
-                    myPattern = Regex.Escape(myPattern.Substring(1)) + "$";
-                }
-
-                idxLast = myPattern.Length - 1;
-                if (idxLast > 0 && myPattern[idxLast] == '*')
-                {
-                    myPattern = "^" + Regex.Escape(myPattern.Substring(0, idxLast));
-                }
-            }
-            return Regex.IsMatch(fInfo.Name, myPattern, RegexOptions.IgnoreCase);
+            return GetRegxPatternActived(() => fInfo.Name);
         }
     }
 
@@ -300,7 +378,6 @@ namespace SynUtil
     [Serializable]
     public class FileChangeTimeRule : FileRuleBase
     {
-
         /// <summary>
         /// Activeds the specified f info.
         /// </summary>
@@ -308,69 +385,9 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(FileInfo fInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-
-            int idxLast = cmpSet.Length - 1;
-            if (cmpSet.IndexOf('-') != -1 && cmpSet.Length > 3
-                && (cmpSet[0] == '[' || cmpSet[0] == '(')
-                && (cmpSet[idxLast] == ']' || cmpSet[idxLast] == ')'))
-            {
-                bool leftVal = false, rightVal = false;
-                string[] tVals = cmpSet.Split('-');
-
-                if (tVals.Length == 2)
-                {
-                    leftVal = (cmpSet[0] == '[') ? IsTimeMatch("<=" + tVals[0], fInfo.LastWriteTime) : IsTimeMatch("<" + tVals[0], fInfo.LastWriteTime);
-                    rightVal = (cmpSet[0] == ']') ? IsTimeMatch(">=" + tVals[1], fInfo.LastWriteTime) : IsTimeMatch(">" + tVals[1], fInfo.LastWriteTime);
-                }
-
-                blnRet = leftVal && rightVal;
-            }
-            else
-            {
-                blnRet = IsTimeMatch(cmpSet, fInfo.LastWriteTime);
-            }
-            return blnRet;
+            return GetTimeActived(() => fInfo.LastWriteTime);
         }
 
-        internal static bool IsTimeMatch(string timeExp, DateTime tTime)
-        {
-            bool blnRet = false;
-            string cmpSet = timeExp.Trim(new char[] { ' ', '[', ']', '(', ')' });
-
-            // > >= == < <=
-            int nIndex = GlobalUtil.FindFirstNumber(cmpSet);
-            if (nIndex == -1)
-            {
-                throw new InvalidOperationException("时间值规则定义错误，必须包含数字(以及比较符号> >= == < <=) !");
-            }
-
-            string cmpStr = cmpSet.Substring(0, nIndex).Trim();
-            string cmpValue = cmpSet.Substring(nIndex).Trim();
-
-            if (cmpStr == ">")
-            {
-                blnRet = Convert.ToDateTime(cmpValue) > tTime;
-            }
-            else if (cmpStr == ">=")
-            {
-                blnRet = Convert.ToDateTime(cmpValue) >= tTime;
-            }
-            else if (cmpStr == "==")
-            {
-                blnRet = Convert.ToDateTime(cmpValue) == tTime;
-            }
-            else if (cmpStr == "<")
-            {
-                blnRet = Convert.ToDateTime(cmpValue) < tTime;
-            }
-            else if (cmpStr == "<=")
-            {
-                blnRet = Convert.ToDateTime(cmpValue) <= tTime;
-            }
-            return blnRet;
-        }
     }
 
     /// <summary>
@@ -387,30 +404,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(FileInfo fInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-
-            int idxLast = cmpSet.Length - 1;
-            if (cmpSet.IndexOf('-') != -1 && cmpSet.Length > 3
-                && (cmpSet[0] == '[' || cmpSet[0] == '(')
-                && (cmpSet[idxLast] == ']' || cmpSet[idxLast] == ')'))
-            {
-                bool leftVal = false, rightVal = false;
-                string[] tVals = cmpSet.Split('-');
-
-                if (tVals.Length == 2)
-                {
-                    leftVal = (cmpSet[0] == '[') ? FileChangeTimeRule.IsTimeMatch("<=" + tVals[0], fInfo.CreationTime) : FileChangeTimeRule.IsTimeMatch("<" + tVals[0], fInfo.CreationTime);
-                    rightVal = (cmpSet[0] == ']') ? FileChangeTimeRule.IsTimeMatch(">=" + tVals[1], fInfo.CreationTime) : FileChangeTimeRule.IsTimeMatch(">" + tVals[1], fInfo.CreationTime);
-                }
-
-                blnRet = leftVal && rightVal;
-            }
-            else
-            {
-                blnRet = FileChangeTimeRule.IsTimeMatch(cmpSet, fInfo.CreationTime);
-            }
-            return blnRet;
+            return GetTimeActived(() => fInfo.CreationTime);
         }
     }
     #endregion
@@ -444,7 +438,7 @@ namespace SynUtil
     /// 文件夹属性规则
     /// </summary>
     [Serializable]
-    [ImplementState(CompleteState.OK, "0.1", Description = "针对文件属性的过滤规则", ReleaseDateGTM = "Fri, 06 Nov 2009 09:34:58 GMT")]
+    [ImplementState(CompleteState.OK, "0.1", Description = "针对文件夹属性的过滤规则", ReleaseDateGTM = "Fri, 06 Nov 2009 09:34:58 GMT")]
     public class FolderAttributeRule : FolderRuleBase
     {
         /*
@@ -457,36 +451,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(DirectoryInfo dInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-            Type AttrType = typeof(FileAttributes);
-            if (cmpSet.IndexOf('|') == -1)
-            {
-                if (Enum.IsDefined(AttrType, cmpSet))
-                {
-                    FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
-                    blnRet = (dInfo.Attributes & cmpAttr) == cmpAttr;
-                }
-            }
-            else
-            {
-                //多个属性条件合并
-                string[] diffAtts = cmpSet.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                bool attrMatch = false;
-                for (int i = 0, j = diffAtts.Length; i < j; i++)
-                {
-                    cmpSet = diffAtts[i].Trim();
-                    if (Enum.IsDefined(AttrType, cmpSet))
-                    {
-                        FileAttributes cmpAttr = (FileAttributes)Enum.Parse(AttrType, cmpSet);
-                        attrMatch = (dInfo.Attributes & cmpAttr) == cmpAttr;
-
-                        if (!attrMatch) break;
-                    }
-                }
-                blnRet = true;
-            }
-            return blnRet;
+            return GetAttributeActived(() => dInfo.Attributes);
         }
     }
 
@@ -504,20 +469,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(DirectoryInfo dInfo)
         {
-            string cmpSet = Setting.Trim();
-            string myPattern = cmpSet.Replace("?", "\\w");
-            if (myPattern[0] == '*')
-            {
-                myPattern = Regex.Escape(myPattern.Substring(1)) + "$";
-            }
-
-            int idxLast = myPattern.Length - 1;
-            if (idxLast > 0 && myPattern[idxLast] == '*')
-            {
-                myPattern = "^" + Regex.Escape(myPattern.Substring(0, idxLast));
-            }
-
-            return Regex.IsMatch(dInfo.Name, myPattern, RegexOptions.IgnoreCase);
+            return GetRegxPatternActived(() => dInfo.Name);
         }
     }
 
@@ -535,30 +487,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(DirectoryInfo dInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-
-            int idxLast = cmpSet.Length - 1;
-            if (cmpSet.IndexOf('-') != -1 && cmpSet.Length > 3
-                && (cmpSet[0] == '[' || cmpSet[0] == '(')
-                && (cmpSet[idxLast] == ']' || cmpSet[idxLast] == ')'))
-            {
-                bool leftVal = false, rightVal = false;
-                string[] tVals = cmpSet.Split('-');
-
-                if (tVals.Length == 2)
-                {
-                    leftVal = (cmpSet[0] == '[') ? FileChangeTimeRule.IsTimeMatch("<=" + tVals[0], dInfo.CreationTime) : FileChangeTimeRule.IsTimeMatch("<" + tVals[0], dInfo.CreationTime);
-                    rightVal = (cmpSet[0] == ']') ? FileChangeTimeRule.IsTimeMatch(">=" + tVals[1], dInfo.CreationTime) : FileChangeTimeRule.IsTimeMatch(">" + tVals[1], dInfo.CreationTime);
-                }
-
-                blnRet = leftVal && rightVal;
-            }
-            else
-            {
-                blnRet = FileChangeTimeRule.IsTimeMatch(cmpSet, dInfo.CreationTime);
-            }
-            return blnRet;
+            return GetTimeActived(() => dInfo.CreationTime);
         }
     }
 
@@ -576,30 +505,7 @@ namespace SynUtil
         /// <returns></returns>
         public override bool Actived(DirectoryInfo dInfo)
         {
-            bool blnRet = false;
-            string cmpSet = Setting.Trim();
-
-            int idxLast = cmpSet.Length - 1;
-            if (cmpSet.IndexOf('-') != -1 && cmpSet.Length > 3
-                && (cmpSet[0] == '[' || cmpSet[0] == '(')
-                && (cmpSet[idxLast] == ']' || cmpSet[idxLast] == ')'))
-            {
-                bool leftVal = false, rightVal = false;
-                string[] tVals = cmpSet.Split('-');
-
-                if (tVals.Length == 2)
-                {
-                    leftVal = (cmpSet[0] == '[') ? FileChangeTimeRule.IsTimeMatch("<=" + tVals[0], dInfo.LastWriteTime) : FileChangeTimeRule.IsTimeMatch("<" + tVals[0], dInfo.LastWriteTime);
-                    rightVal = (cmpSet[0] == ']') ? FileChangeTimeRule.IsTimeMatch(">=" + tVals[1], dInfo.LastWriteTime) : FileChangeTimeRule.IsTimeMatch(">" + tVals[1], dInfo.LastWriteTime);
-                }
-
-                blnRet = leftVal && rightVal;
-            }
-            else
-            {
-                blnRet = FileChangeTimeRule.IsTimeMatch(cmpSet, dInfo.LastWriteTime);
-            }
-            return blnRet;
+            return GetTimeActived(() => dInfo.LastWriteTime);
         }
     }
     #endregion
