@@ -236,8 +236,16 @@ namespace SynUtil
             Dictionary<string, string> tResultDict = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             foreach (SynFile file in tDict.Values)
             {
+                if (file.HashCode.Equals("N/A", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    //TODO:没有Hash的文件记录
+                    continue;
+                }
+
                 if (tResultDict.ContainsKey(file.HashCode))
                 {
+                    //TODO:以及存在链接文件（同一个文件，建立映射）
+                    continue;
                     throw new InvalidOperationException("哈希码不唯一，请重新寻找其他哈希算法！");
                 }
                 tResultDict.Add(file.HashCode, file.FileID);
