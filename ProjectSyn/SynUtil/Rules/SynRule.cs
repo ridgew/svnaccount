@@ -19,7 +19,7 @@ namespace SynUtil
         public string Setting { get; set; }
 
         /// <summary>
-        /// 如前一规则是OR关系，默认为false。
+        /// 与前一规则是OR关系，默认为false。
         /// </summary>
         [XmlAttribute]
         public bool OrBeforeRule { get; set; }

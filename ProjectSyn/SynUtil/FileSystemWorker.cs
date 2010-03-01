@@ -44,7 +44,7 @@ namespace SynUtil
         /// </summary>
         public Predicate<FileInfo> FileExclude { get; set; }
 
-        // <summary>
+        /// <summary>
         /// 获取或设置打包的文件夹排除信息
         /// </summary>
         public Predicate<DirectoryInfo> FolderExclude { get; set; }
